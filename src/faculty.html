@@ -1,0 +1,322 @@
+<!-- add the following to user settings JSON in Visual Studio Code -->
+<!-- 
+     "liveServer.settings.ignoreFiles": [
+       "**/backend/data/*",
+     ],
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- set character encoding and mobile responsiveness -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:,">
+  <!-- PAGE TITLE -->
+  <title>Faculty – RateMyTeam</title>
+  <!-- CSS STYLESHEETS -->
+  <link rel="stylesheet" href="css/lib/bootstrap.min.css" />
+  <link rel="stylesheet" href="css/lib/sweetalert2.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- JS SCRIPTS -->
+  <script src="js/lib/bootstrap.bundle.min.js"></script>
+
+  <script src="js/lib/sweetalert2.all.min.js"></script>
+</head>
+
+<body class="bg-light">
+
+  <!-- MAIN CONTAINER -->
+  <div class="container py-4">
+
+    <!-- LOGO IMAGE -->
+    <!-- <div class="d-flex justify-content-center align-items-center">
+      <img src="./img/computer-svgrepo.svg" alt="computer monitor image" style="max-width: 10%;" class="mt-2 mb-2">
+    </div> -->
+
+    <!-- PAGE HEADER -->
+    <div class="row align-items-center mb-3 text-center">
+      <div class="col text-start">
+        <h5 id="userEmailHeader" class="mb-0"></h5>
+      </div>
+      <div class="col-auto mx-auto">
+        <h3 class="mb-0">
+          <span class="fw-bold">Faculty</span>
+          <span class="opacity-75 fw-light">|</span>
+          <span class="opacity-50 fw-light">RateMyTeam</span>
+        </h3>
+      </div>
+      <div class="col text-end">
+        <a href="index.html" style="text-decoration: none;">
+          <h5 class="mb-0 text-primary">
+            <u>Log out</u>
+          </h5>
+        </a>
+      </div>
+    </div>
+
+    <!-- ACCORDION CONTAINER -->
+    <div class="accordion mb-3" id="formAccordion">
+
+      <!-- CREATE SURVEY -->
+      <div class="card shadow mb-3">
+        <div class="card-header bg-success text-light">
+          <h2 class="mb-0">
+            <button class="btn text-light w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSurvey" aria-expanded="true" aria-controls="collapseSurvey">
+              <b>Create Survey</b>
+            </button>
+          </h2>
+        </div>
+        <div id="collapseSurvey" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+          <div class="card-body">
+            <form id="formAddSurvey" onsubmit="return true">
+              <!-- ROW -->
+              <!-- GAP -->
+              <div class="row g-2 mb-2">
+                <div class="col-md-6">
+                  <!-- input for survey recipient group -->
+                  <select id="surveyRecipientGroup" class="form-control" aria-label="select recipient group">
+                    <option value="" selected hidden>Select recipient group</option>
+                    <option value="All groups">All groups</option>
+                    <option value="Group 1">Group 1 (Preston, Kyle)</option>
+                    <option value="Group 2">Group 2 (Ezra, Javontae)</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <!-- input for survey title -->
+                  <input id="surveyTitle" type="text" class="form-control" placeholder="Enter survey title" aria-label="input survey title" />
+                </div>
+              </div>
+              <div class="row g-2 mb-2">
+                <div class="col-md-2">
+                  <!-- input for survey due date -->
+                  <input id="surveyDueDate" type="date" class="form-control" required aria-label="input due date" />
+                </div>
+                <div class="col-md-4">
+                  <!-- input for faculty review requirement -->
+                  <select id="txtFacultyReviewRequirement" class="form-control" aria-label="select review requirement">
+                    <option value="" selected hidden>Require faculty review</option>
+                    <option value="Yes">Yes (wait to release results)</option>
+                    <option value="No">No (release results upon completion)</option>
+                    <option value="No results">Do not release any results</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <!-- input for number of survey questions -->
+                  <input id="txtSurveyQuestionCount" type="text" class="form-control" placeholder="Number of questions" aria-label="input question count" />
+                </div>
+                <div class="col-md-2">
+                  <!-- submit button -->
+                  <button type="submit" id="btnCreateSurvey" class="btn btn-success w-100">Create Survey</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- CREATE GROUP -->
+      <div class="card shadow mb-3">
+        <div class="card-header bg-success text-light">
+          <h2 class="mb-0">
+            <button class="btn text-light w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroup" aria-expanded="false" aria-controls="collapseGroup">
+              <b>Create Group</b>
+            </button>
+          </h2>
+        </div>
+        <div id="collapseGroup" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+          <div class="card-body">
+            <form id="formAssignGroup" onsubmit="return true">
+              <!-- ROW -->
+              <!-- GAP -->
+              <div class="row g-2 mb-2">
+                <div class="col-md-4">
+                  <!-- input for assigned course -->
+                  <select id="assignCourse" class="form-control" aria-label="Select course">
+                    <option value="" selected hidden>Select course</option>
+                    <option value="csc3100">CSC 3100</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <!-- input for group name -->
+                  <input id="assignGroupName" type="text" class="form-control" placeholder="Enter group name" aria-label="Group name" />
+                </div>
+                <div class="col-md-4">
+                  <!-- input for assigned task -->
+                  <input id="assignGroupTask" type="text" class="form-control" placeholder="Assigned task or project" aria-label="Assigned task" />
+                </div>
+              </div>
+              <div class="row g-2 mb-2">
+                <div class="col-md-2">
+                  <!-- input for due date -->
+                  <input id="assignGroupDueDate" type="date" class="form-control" required aria-label="Due date" />
+                </div>
+                <div class="col-md-8">
+                  <!-- input for members list -->
+                  <input id="assignGroupMembers" type="text" class="form-control" placeholder="Enter member names" aria-label="Group members" />
+                </div>
+                <div class="col-md-2">
+                  <!-- submit button -->
+                  <button type="submit" id="btnAssignGroup" class="btn btn-success w-100">Create Group</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- CREATE COURSE -->
+      <div class="card shadow mb-3">
+        <div class="card-header bg-success text-light">
+          <h2 class="mb-0">
+            <button class="btn text-light w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCourse" aria-expanded="false" aria-controls="collapseCourse">
+              <b>Create Course</b>
+            </button>
+          </h2>
+        </div>
+        <div id="collapseCourse" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+          <div class="card-body">
+            <!-- add task inputs (Bootstrap-styled, with aria-labels) -->
+            <form id="formCreateCourse" onsubmit="return true">
+              <!-- ROW -->
+              <!-- GAP -->
+              <div class="row g-2 mb-2">
+                <div class="col-md-4">
+                  <!-- input for course code -->
+                  <input id="courseCode" type="text" class="form-control" placeholder="Enter course code" aria-label="Course code" />
+                </div>
+                <div class="col-md-4">
+                  <!-- input for course section -->
+                  <input id="courseSection" type="text" class="form-control" placeholder="Enter course section" aria-label="Course section" />
+                </div>
+                <div class="col-md-4">
+                  <!-- input for course name -->
+                  <input id="courseName" type="text" class="form-control" placeholder="Enter course name" aria-label="Course name" />
+                </div>
+              </div>
+              <div class="row g-2 mb-2">
+                <div class="col-md-6">
+                  <!-- input for student list -->
+                  <input id="courseStudents" type="text" class="form-control" placeholder="Enter student names" aria-label="Student list" />
+                </div>
+                <div class="col-md-4">
+                  <!-- input for semester -->
+                  <select id="courseSemester" class="form-control" aria-label="Select semester">
+                    <option value="" selected hidden>Select semester</option>
+                    <option value="spring2025">Spring 2025</option>
+                    <option value="summer2025">Summer 2025</option>
+                    <option value="fall2025">Fall 2025</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <!-- submit button -->
+                  <button type="submit" id="btnCreateCourse" class="btn btn-success w-100">Create Course</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SURVEY RESULTS TABLE -->
+    <div class="card shadow mb-3">
+      <div class="card-header bg-primary text-light">
+        <b>Survey Results</b>
+      </div>
+
+      <div class="card-body">
+        <!-- search box -->
+        <!-- <input type="text" id="surveySearch" class="form-control mb-3" placeholder="Search course, group, member..." aria-label="search survey results" /> -->
+        <div class="table-responsive">
+          <table class="table table-bordered" id="surveyTable">
+            <thead class="thead-dark">
+              <tr>
+                <th>Course</th>
+                <th>Evaluations</th>
+                <th>Alerts</th>
+              </tr>
+            </thead>
+            <tbody id="surveyTableBody">
+              <tr>
+                <td>CSC 3100-001</td>
+                <td>6 submitted, 2 not finished <span class="text-primary">(details)</span></td>
+                <td>No alerts at this time</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP LIST TABLE -->
+    <div class="card shadow">
+      <div class="card-header bg-primary text-light">
+        <b>Group List</b>
+      </div>
+
+      <div class="card-body">
+        <!-- search box -->
+        <input type="text" id="txtSearchGroups" class="form-control mb-3" placeholder="Search course, group, member, notes..." aria-label="search tasks" />
+        <div class="table-responsive">
+          <table class="table table-bordered" id="taskTable">
+            <thead class="thead-dark">
+              <tr>
+                <th>Course</th>
+                <th>Group</th>
+                <th>Members</th>
+                <th>Evaluations</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="taskList">
+              <tr>
+                <td>CSC 3100-001</td>
+                <td>Group 1</td>
+                <td>Preston, Kyle</td>
+                <td>3 submitted, 1 not finished <span class="text-primary">(details)</span></td>
+                <td>Deserve an A for current project</td>
+              </tr>
+              <tr>
+                <td>CSC 3100-001</td>
+                <td>Group 2</td>
+                <td>Ezra, Javontae</td>
+                <td>3 submitted, 1 not finished <span class="text-primary">(details)</span></td>
+                <td>Should use Vim to boost productivity</td>
+              </tr>
+            </tbody>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    document.getElementById('txtSearchGroups').addEventListener('input', function () {
+      const query = this.value.toLowerCase();
+      const rows = document.querySelectorAll('#taskList tr');
+
+      rows.forEach(row => {
+        const course = row.children[0].textContent.toLowerCase();
+        const group = row.children[1].textContent.toLowerCase();
+        const members = row.children[2].textContent.toLocaleLowerCase()
+        const evals = row.children[3].textContent.toLowerCase();
+
+        const match = course.includes(query) || group.includes(query) || members.includes(query) || evals.includes(query);
+        row.style.display = match ? '' : 'none';
+      });
+    });
+
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+      document.getElementById('userEmailHeader').textContent = userEmail;
+    } else {
+      document.getElementById('userEmailHeader').textContent = 'No email found';
+    }
+
+  </script>
+
+</body>
+
+</html>
