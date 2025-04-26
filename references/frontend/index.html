@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Review&copy;</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Add CSS inside this style tag to change the look of the page -->
+    <style>
+        .card {border-color:black;}
+        .navbar {background-color:rgb(200, 200, 200);}
+    </style>
+</head>
+<body style="background-color: rgb(230, 230, 230);">
+
+    <!--Navbar-->
+    <nav id="pageNavbar" class="navbar sticky-top px-2 px-md-5 py-3">
+        <div class="container-fluid">
+            <button id="btnSwitchToDashboard" class="btn nav-link me-3" type="button"><b>Dashboard</b></button>
+            <button id="btnSwitchToCourses" class="btn d-none d-md-block nav-link me-3" type="button">Courses</button>
+            <button id="btnSwitchToGroups" class="btn d-none d-md-block nav-link me-3" type="button">Groups</button>
+            <div class="nav-item dropdown ms-md-auto me-auto me-md-5">
+                <button id="btnAccountDropdown" class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown"><img src="/img/account_circle.svg" class="me-1" width="30" alt="">[First Last]</button>
+                <ul class="dropdown-menu">
+                    <li class="dropdown-item"><button id="btnSwitchToProfile" type="button" class="btn p-0 m-0">Go To Profile</button></li>
+                    <li class="dropdown-item"><button id="btnSignOut" type="button" class="btn p-0 m-0">Sign Out</button></li> <!--Needs Request-->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!--Login Page-->
+    <div id="pageLogin" class="d-flex flex-column min-vh-100 align-items-center justify-content-center">
+        <!--<p style="color: rgb(230, 230, 230);">Designed by Trevor Clark and Rivers Haley</p>-->
+        <form id="formLogin" class="card d-flex flex-column align-items-stretch col-lg-4 col-md-6 p-3">
+            <h1 class="align-self-center mb-1">Group Review&copy;</h1>
+            <h2 class="align-self-center mb-4">Login</h3>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Please enter your email: </p>
+                <input id="txtLoginEmail" type="email">
+            </label>
+            <label class="d-flex mb-4">
+                <p class="me-1 mb-0">Please enter your password: </p>
+                <input id="txtLoginPassword" type="password">
+            </label>
+            <button id="btnSubmitLogin" type="button" class="btn btn-primary col-12">Login</button>
+            <button id="btnSwitchToRegistration" type="button" class="btn btn-link col-12">Need an Account?</button>
+        </form>
+    </div>
+
+    <!--Registration Page-->
+    <div id="pageRegister" class="d-flex flex-column min-vh-100 align-items-center justify-content-center">
+        <form id="formRegister" class="card d-flex flex-column align-items-stretch col-lg-4 col-md-6 p-3">
+            <button id="btnSwitchToLogin" type="button" class="btn btn-link align-self-start col-md-4 mb-4">&lt; Back to Login</button>
+            <h1 class="align-self-center mb-1">Group Review&copy;</h1>
+            <h2 class="align-self-center mb-4">Registration</h3>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Please enter your email: </p>
+                <input id="txtRegistrationEmail" type="email">
+            </label>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Please confirm your email: </p>
+                <input id="txtRegistrationConfirmEmail" type="email">
+            </label>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Please enter a password: </p>
+                <input id="txtRegistrationPassword" type="password">
+            </label>
+            <label class="d-flex mb-4">
+                <p class="me-1 mb-0">Please confirm your password: </p>
+                <input id="txtRegistrationConfirmPassword" type="password">
+            </label>
+            <button id="btnSubmitRegistration" type="button" class="btn btn-primary col-12">Register</button>
+        </form>
+    </div>
+
+    <!--Dashboard-->
+    <div id="pageDashboard" class="d-flex flex-column flex-md-row align-items-md-start justify-content-md-center p-3 p-md-4 p-lg-5">
+        <!-- Course Info Here -->
+        <div class="card text-center col-md-6 col-lg-4">
+            <div class="card-body d-flex flex-column align-items-center">
+                <h3 class="card-title">Courses</h3>
+                <!-- List of Courses Here -->
+                <table id="tblCoursesFull" class="table mb-3">
+                    <tr>
+                        <th>Name</th>
+                        <th>Instructor</th>
+                        <th>Student Count</th>
+                    </tr>
+                    <tr>
+                        <td>WebDev</td>
+                        <td>Burchfield</td>
+                        <td>1000/1001</td>
+                    </tr>
+                </table>
+                <button id="btnSwitchToCourses" type="button" class="btn btn-primary">Go To Course List</button>
+            </div>
+        </div>
+        <!-- Team Info Here -->
+        <div class="card text-center col-md-6 col-lg-4 ms-md-4 ms-lg-5 mt-3 mt-md-0">
+            <div class="card-body">
+                <h3 class="card-title">Groups</h3>
+                <!-- List of Courses Here -->
+                <table id="tblCoursesFull" class="table mb-3">
+                    <tr>
+                        <th>Group Number</th>
+                        <th>Course</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>Web Dev</td>
+                    </tr>
+                </table>
+                <button id="btnSwitchToGroups" type="button" class="btn btn-primary">Manage Groups</button>
+            </div>
+        </div>
+    </div>
+
+    <!--Course List-->
+    <div id="pageCourses" class="d-flex flex-column align-items-center col-12 p-3 p-md-4 p-lg-5">
+        <div class="card text-center mt-3">
+            <div class="card-body">
+                <h3 class="card-title">Course List</h3>
+                <table id="tblCoursesFull" class="table mb-3">
+                    <tr>
+                        <th>Name</th>
+                        <th>Instructor</th>
+                        <th>Student Count</th>
+                        <th>Actions</th>
+                    </tr>
+                    <tr>
+                        <td><p class="m-0 p-2">Web Dev</p></td>
+                        <td><p class="m-0 p-2">Burchfield</p></td>
+                        <td><p class="m-0 p-2">1000/1001</p></td>
+                        <td>
+                            <button id="btnSwitchToCourseEdit"  type="button" class="btn btn-primary">Edit</button>
+                            <button id="btnSwitchToCourseDelete" type="button" class="btn btn-danger">Delete</button>
+                        </td>
+                    </tr>
+                </table>
+                <button id="btnSwitchToCourseCreate" type="button" class="btn btn-success">New Course</button>
+            </div>
+        </div>
+    </div>
+
+    <!--Course Create-->
+    <div id="pageCourseCreate" class="d-flex flex-column flex-md-row min-vh-100 align-items-md-start justify-content-md-center p-3 p-md-4 p-lg-5">
+        <form id="formCourseCreate" class="card d-flex flex-column align-items-center col-lg-4 col-md-6 p-3">
+            <h3 class="align-self-center mb-4">Create Course</h3>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Name:</p>
+                <input id="txtCourseName" type="text">
+            </label>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Capacity:</p>
+                <input id="txtCourseCapacity" type="number">
+            </label>
+            <table id="tblCoursesFull" class="table mb-3">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+                <tr>
+                    <td><p class="m-0 p-2">Billy Bob</p></td>
+                    <td><p class="m-0 p-2">bbob@aol.com</p></td>
+                    <td>
+                        <button id="btnRemoveStudent" type="button" class="btn btn-danger">Remove</button> <!--Needs Request-->
+                    </td>
+                </tr>
+            </table>
+            <button id="btnSubmitCourseCreate" type="button" class="btn btn-success col-12">Create</button> <!--Needs Request-->
+        </form>
+        <form id="formStudentCreate" class="card d-flex flex-column align-items-center col-lg-4 col-md-6 p-3 ms-md-3 mt-3 mt-md-0">
+            <h3 class="align-self-center mb-4">Add Student</h3>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Name:</p>
+                <input id="txtStudentName" type="text">
+            </label>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Email:</p>
+                <input id="txtStudentEmail" type="email">
+            </label>
+            <button type="button" class="btn btn-primary">Add Student</button> <!--Needs Request-->
+        </form>
+    </div>
+
+    <!--Course Update-->
+    <div id="pageCourseEdit" class="d-flex flex-column flex-md-row min-vh-100 align-items-md-start justify-content-md-center p-3 p-md-4 p-lg-5">
+        <form id="formCourseEdit" class="card d-flex flex-column align-items-center col-lg-4 col-md-6 p-3">
+            <h3 class="align-self-center mb-4">Edit Course</h3>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Name:</p>
+                <input id="txtCourseName" type="text">
+            </label>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Capacity:</p>
+                <input id="txtCourseCapacity" type="number">
+            </label>
+            <table id="tblCoursesFull" class="table mb-3">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+                <tr>
+                    <td><p class="m-0 p-2">Billy Bob</p></td>
+                    <td><p class="m-0 p-2">bbob@aol.com</p></td>
+                    <td>
+                        <button id="btnRemoveStudent" type="button" class="btn btn-danger">Remove</button> <!--Needs Request-->
+                    </td>
+                </tr>
+            </table>
+            <button id="btnSubmitCourseEdit" type="button" class="btn btn-success col-12">Done</button> <!--Needs Request-->
+        </form>
+        <form id="formStudentCreate" class="card d-flex flex-column align-items-center col-lg-4 col-md-6 p-3 ms-md-3 mt-3 mt-md-0">
+            <h3 class="align-self-center mb-4">Add Student</h3>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Name:</p>
+                <input id="txtStudentName" type="text">
+            </label>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Email:</p>
+                <input id="txtStudentEmail" type="email">
+            </label>
+            <button type="button" class="btn btn-primary">Add Student</button> <!--Needs Request-->
+        </form>
+    </div>
+
+    <!--Course Confirm Delete-->
+    <div id="pageCourseDelete" class="d-flex flex-column flex-md-row min-vh-100 align-items-md-start justify-content-md-center p-3 p-md-4 p-lg-5">
+        <div>
+            <h1>Are you sure you want to delete?</h1>
+            <button id="btnDoIt" type="button" class="btn btn-danger">Yes</button>
+            <button id="btnSwitchToCourses" type="button" class="btn btn-primary">No</button>
+        </div>
+    </div>
+
+    <!--Group List-->
+    <div id="pageGroups" class="d-flex flex-column align-items-center col-12 p-3 p-md-4 p-lg-5">
+        <div class="card text-center mt-3">
+            <div class="card-body">
+                <h3 class="card-title">Group List</h3>
+                <table id="tblGroupsFull" class="table mb-3">
+                    <tr>
+                        <th>Group Number</th>
+                        <th>Course</th>
+                        <th>Actions</th>
+                    </tr>
+                    <tr>
+                        <td><p class="m-0 p-2">1</p></td>
+                        <td><p class="m-0 p-2">Web Dev</p></td>
+                        <td>
+                            <button id="btnSwitchToReview"  type="button" class="btn btn-primary">Reviews</button>
+                            <button id="btnSwitchToReviewCreate"  type="button" class="btn btn-primary">New Review</button>
+                            <button id="btnSwitchToGroupEdit"  type="button" class="btn btn-primary">Edit</button>
+                            <button id="btnSwitchToGroupDelete" type="button" class="btn btn-danger">Delete</button>
+                        </td>
+                    </tr>
+                </table>
+                <button id="btnSwitchToGroupCreate" type="button" class="btn btn-success">New Course</button>
+            </div>
+        </div>
+    </div>
+
+    <!--Group Update-->
+    <div id="pageGroupEdit" class="d-flex flex-column flex-md-row min-vh-100 align-items-md-start justify-content-md-center p-3 p-md-4 p-lg-5">
+        <form id="formGroupEdit" class="card d-flex flex-column align-items-center col-lg-4 col-md-6 p-3">
+            <h3 class="align-self-center mb-4">Edit Group</h3>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Number:</p>
+                <input id="txtCourseName" type="number">
+            </label>
+            <table id="tblCoursesFull" class="table mb-3">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+                <tr>
+                    <td><p class="m-0 p-2">Billy Bob</p></td>
+                    <td><p class="m-0 p-2">bbob@aol.com</p></td>
+                    <td>
+                        <button id="btnRemoveStudent" type="button" class="btn btn-danger">Remove</button> <!--Needs Request-->
+                    </td>
+                </tr>
+            </table>
+            <button id="btnSubmitCourseEdit" type="button" class="btn btn-success col-12">Done</button> <!--Needs Request-->
+        </form>
+        <form id="formStudentCreate" class="card d-flex flex-column align-items-center col-lg-4 col-md-6 p-3 ms-md-3 mt-3 mt-md-0">
+            <h3 class="align-self-center mb-4">Add Student</h3>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Name:</p>
+                <input id="txtStudentName" type="text">
+            </label>
+            <label class="d-flex mb-2">
+                <p class="me-1 mb-0">Email:</p>
+                <input id="txtStudentEmail" type="email">
+            </label>
+            <button type="button" class="btn btn-primary">Add Student</button> <!--Needs Request-->
+        </form>
+    </div>
+
+    <!--Group Confirm Delete-->
+    <div id="pageGroupDelete" class="d-flex flex-column flex-md-row min-vh-100 align-items-md-start justify-content-md-center p-3 p-md-4 p-lg-5">
+        <div>
+            <h1>Are you sure you want to delete?</h1>
+            <button id="btnDoIt" type="button" class="btn btn-danger">Yes</button>
+            <button id="btnSwitchToGroups" type="button" class="btn btn-primary">No</button>
+        </div>
+    </div>
+
+    <!--Profile-->
+    <div id="pageProfile" class="d-flex flex-column align-items-center col-12 p-3 p-md-4 p-lg-5">
+        <!--Profile Card-->
+        <div class="card text-center mt-3 col-6">
+            <div class="card-body">
+                <h3 class="card-title">Your Profile</h3>
+                <h5 class="card-text">[Placeholder Name]</h5>
+                <p class="card-text">[Placeholder Email]</p>
+                <button id="btnChangeEmail" type="button" class="btn-primary btn">Change Email</button>
+                <button id="btnChangePassword" type="button" class="btn-danger btn">Change Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!--Review Create-->
+    <div id="pageCreateReview" class="d-flex flex-column align-items-center col-12 p-3 p-md-4 p-lg-5">
+        <!--New Review Form Card-->
+        <div class="card text-center mt-3 col-8">
+            <div class="card-body">
+                <h3 class="card-title">Create New Review</h3>
+                <h5 class="card-text">[Course Name, Group Number]</h5>
+                <form class="text-start mt-4">
+                    <label for="txtPubFeedback" class="form-label">Enter Public Feedback:</label>
+                    <textarea id="txtPubFeedback" type="text" class="form-control mb-3"></textarea>
+                    <label for="txtPrivFeedback" class="form-label">Enter Private Feedback: (Optional)</label>
+                    <textarea id="txtPrivFeedback" type="text" class="form-control mb-3"></textarea>
+                    <label for="rngRating" class="form-label">What is Your Overall Rating?</label>
+                    <input id="rngRating" type="range" class="form-range" min="1" max="10" step="1">
+                    <label id="ratingDisplay" for="rngRating" class="form-label mb-3">Value: </label>
+                </br>
+                    <button id="btnSubmitReview" type="button" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!--Review View-->
+    <div id="pageReviews" class="d-flex flex-column align-items-center col-12 p-3 p-md-4 p-lg-5">
+        <!--View Reviews-->
+        <div class="card text-center mt-3 col-8">
+            <div class="card-body">
+                <h3 class="card-title">Reviews for [Course Name]</h3>
+                <table id="tblReviews" class="table mb-3">
+                    <tr>
+                        <th>Group Number</th>
+                        <th>Course</th>
+                        <th>Reviews</th>
+                    </tr>
+                    <tr>
+                        <td><p class="m-0 p-2">1</p></td>
+                        <td><p class="m-0 p-2">Web Dev</p></td>
+                        <td>
+                            <p class="m-0 p-2">[Review Summary]</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!--Scripts-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/scripts/index.js"></script>
+</body>
+</html>
