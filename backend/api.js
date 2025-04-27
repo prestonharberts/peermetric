@@ -58,7 +58,90 @@ app.delete('/session', (req, res, next) => {
     }
 })
 
+// USER //
 
+// Create user
+// POST /user
+// with body.email body.passwordHash body.firstName body.lastName body.title body.contactInfo
+// Returns 201 Created if successful
+// Returns 400 Bad Request otherwise
+app.post('/user', (req, res, next) => {
+    // TODO add actual validation and user creation
+    if(req.body.email && req.body.passwordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.contactInfo) {
+        res.status(201)
+    } else {
+        res.status(400)
+    }
+})
+
+// Update user
+// PUT /user
+// with body.email body.newPasswordHash body.firstName body.lastName body.title body.contactInfo
+// with cookie SESSION_ID
+// Returns 201 Created if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.put('/user', (req, res, next) => {
+    const sessionID = req.cookies.SESSION_ID
+    if(validateSession(sessionID)) {
+        // TODO add actual validation and user update
+        if(req.body.email && req.body.newPasswordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.contactInfo) {
+            res.status(201)
+        } else {
+            res.status(400)
+        }
+    } else {
+        res.status(401)
+    }
+})
+
+// Get user
+// GET /user
+// with cookie SESSION_ID
+// Returns 200 OK and user object if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// User object:
+// {
+//   email: string,
+//   firstName: string,
+//   lastName: string,
+//   title: string,
+//   contactInfo: string
+// }
+app.get('/user', (req, res, next) => {
+    if(req.cookies.SESSION_ID) {
+        res.status(200).json({
+            email: "lol@aol.com",
+            firstName: "John",
+            lastName: "Doe",
+            title: "Mr.",
+            contactInfo: "123-456-7890"
+        })
+    } else {
+        res.status(401)
+    }
+})
+
+// Delete user
+// DELETE /user
+// with body.password
+// with cookie SESSION_ID
+// Returns 201 Created if successfully deleted
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.delete('/user', (req, res, next) => {
+    const sessionID = req.cookies.SESSION_ID
+    if(validateSession(sessionID)) {
+        // TODO add actual validation and delete user
+        if(req.body.password) {
+            res.status(201)
+        } else {
+            res.status(400)
+        }
+    } else {
+        res.status(401)
+    }
+})
 
 // Listen
 app.listen(PORT, () => {
