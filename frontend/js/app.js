@@ -21,13 +21,13 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
   if (!document.querySelector("#txtPasswordLogin").value) {
     strErrorRequired += "password, "
   }
-  strErrorRequired = strErrorRequired.replace(/, $/, "");
+  strErrorRequired = strErrorRequired.replace(/, $/, "")
   // ChatGPT helped me come up with this regex to replace the last comma with an "and"
-  strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ");
+  strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ")
 
   // ChatGPT helped me come up with this regex to remove a comma if it's the only one
   if ((strErrorRequired.match(/,/g) || []).length === 1) {
-    strErrorRequired = strErrorRequired.replace(",", "");
+    strErrorRequired = strErrorRequired.replace(",", "")
   }
 
   if (strErrorRequired != '') {
@@ -45,13 +45,13 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
   }
   else {
     if (sampleUsers[strEmail] && sampleUsers[strEmail].password === strPassword) {
-      localStorage.setItem('userName', sampleUsers[strEmail].name);
-      localStorage.setItem('userEmail', strEmail);
+      localStorage.setItem('userName', sampleUsers[strEmail].name)
+      localStorage.setItem('userEmail', strEmail)
 
       if (strLoginType == 'Student login') {
-        window.location.href = 'student.html';
+        window.location.href = 'student.html'
       } else if (strLoginType == 'Faculty login') {
-        window.location.href = 'faculty.html';
+        window.location.href = 'faculty.html'
       }
     } else {
       Swal.fire({
@@ -59,7 +59,7 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
         html: '<p>Incorrect email or password</p>',
         icon: 'error',
         confirmButtonText: 'Close'
-      });
+      })
     }
   }
 })
@@ -74,9 +74,9 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
 
   const regEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
   const regPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/
-  const regMiddleInitial = /^[a-zA-Z]$/;
+  const regMiddleInitial = /^[a-zA-Z]$/
   const regPhone = /^\s*(?:\+?(\d{1,3}))?([-. (]*(\d{3})[-. )]*)?((\d{3})[-. ]*(\d{2,4})(?:[-.x ]*(\d+))?)\s*$/
-  const regDiscord = /^[a-zA-Z0-9_]+#[0-9]{4}$/;
+  const regDiscord = /^[a-zA-Z0-9_]+#[0-9]{4}$/
 
   let strEmail = document.querySelector("#txtEmailRegister").value
   strEmail = strEmail.toLowerCase()
@@ -86,25 +86,25 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
     strErrorMessage += `<p>Please enter a valid email address</p>`
   }
 
-  let strPassword = document.querySelector("#txtPasswordRegister").value;
-  let strPasswordConfirm = document.querySelector("#txtPasswordConfirm").value;
+  let strPassword = document.querySelector("#txtPasswordRegister").value
+  let strPasswordConfirm = document.querySelector("#txtPasswordConfirm").value
   if (!document.querySelector("#txtPasswordRegister").value) {
-    strErrorRequired += "password, ";
+    strErrorRequired += "password, "
   } else if (!regPassword.test(strPassword)) {
-    strErrorMessage += `<p>Please enter a valid password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>`;
+    strErrorMessage += `<p>Please enter a valid password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>`
   } else if (strPassword !== strPasswordConfirm) {
-    strErrorMessage += `<p>Passwords do not match</p>`;
+    strErrorMessage += `<p>Passwords do not match</p>`
   }
 
-  let strFirstName = document.querySelector("#txtFirstName").value;
+  let strFirstName = document.querySelector("#txtFirstName").value
   let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
-  let strLastName = document.querySelector("#txtLastName").value;
-  let strPreferredName = document.querySelector("#txtPreferredName").value;
+  let strLastName = document.querySelector("#txtLastName").value
+  let strPreferredName = document.querySelector("#txtPreferredName").value
   if (!regMiddleInitial.test(strMiddleInitial) && document.querySelector("#txtMiddleInitial").value) {
     strErrorMessage += `<p>Please enter a valid middle initial</p>`
   }
   if (strPreferredName === strFirstName || strPreferredName === strMiddleInitial || strPreferredName === strLastName) {
-    strPreferredName = "";
+    strPreferredName = ""
   }
 
   let strPhone = document.querySelector("#txtPhone").value
@@ -125,13 +125,13 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
     strErrorRequired += "last name, "
   }
 
-  strErrorRequired = strErrorRequired.replace(/, $/, "");
+  strErrorRequired = strErrorRequired.replace(/, $/, "")
   // ChatGPT helped me come up with this regex:
-  strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ");
+  strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ")
 
   // ChatGPT helped me come up with this regex to remove a comma if it's the only one
   if ((strErrorRequired.match(/,/g) || []).length === 1) {
-    strErrorRequired = strErrorRequired.replace(",", "");
+    strErrorRequired = strErrorRequired.replace(",", "")
   }
 
   if (strErrorRequired != '') {
@@ -154,35 +154,35 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
       password: strPassword,
       name: strFirstName,
       lastName: strLastName
-    };
+    }
 
     // Add optional fields only if they are not empty
     if (strMiddleInitial) {
-      newUser.middleInitial = strMiddleInitial;
+      newUser.middleInitial = strMiddleInitial
     }
     if (strPreferredName) {
-      newUser.preferredName = strPreferredName;
+      newUser.preferredName = strPreferredName
     }
     if (strPhone) {
-      newUser.phone = strPhone;
+      newUser.phone = strPhone
     }
     if (strDiscord) {
-      newUser.discord = strDiscord;
+      newUser.discord = strDiscord
     }
 
     // Add the new user to the sampleUsers object
-    sampleUsers[strEmail] = newUser;
+    sampleUsers[strEmail] = newUser
 
     // Log the updated sampleUsers object to the console
-    console.log(sampleUsers);
+    console.log(sampleUsers)
 
     // Redirect logic
     if (strRegisterType == 'Student account') {
-      localStorage.setItem('userEmail', strEmail);
-      window.location.href = 'student.html';
+      localStorage.setItem('userEmail', strEmail)
+      window.location.href = 'student.html'
     } else if (strRegisterType == 'Faculty account') {
-      localStorage.setItem('userEmail', strEmail);
-      window.location.href = 'faculty.html';
+      localStorage.setItem('userEmail', strEmail)
+      window.location.href = 'faculty.html'
     }
   }
 

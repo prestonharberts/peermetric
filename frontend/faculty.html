@@ -14,6 +14,8 @@
   <link rel="icon" href="data:,">
   <!-- PAGE TITLE -->
   <title>Faculty – RateMyTeam</title>
+  <!-- SITE ICON -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <!-- CSS STYLESHEETS -->
   <link rel="stylesheet" href="css/lib/bootstrap.min.css" />
   <link rel="stylesheet" href="css/lib/sweetalert2.min.css" />
@@ -25,10 +27,7 @@
 </head>
 
 <body class="bg-light">
-
-  <!-- MAIN CONTAINER -->
   <div class="container py-4">
-
     <!-- LOGO IMAGE -->
     <!-- <div class="d-flex justify-content-center align-items-center">
       <img src="./img/computer-svgrepo.svg" alt="computer monitor image" style="max-width: 10%;" class="mt-2 mb-2">
@@ -291,28 +290,30 @@
     </div>
   </div>
 
+  <!-- CUSTOM JS -->
+  <script src="js/app.js"></script>
   <!-- JAVASCRIPT LOGIC -->
   <script>
     document.getElementById('txtSearchGroups').addEventListener('input', function () {
-      const query = this.value.toLowerCase();
-      const rows = document.querySelectorAll('#taskList tr');
+      const query = this.value.toLowerCase()
+      const rows = document.querySelectorAll('#taskList tr')
 
       rows.forEach(row => {
-        const course = row.children[0].textContent.toLowerCase();
-        const group = row.children[1].textContent.toLowerCase();
+        const course = row.children[0].textContent.toLowerCase()
+        const group = row.children[1].textContent.toLowerCase()
         const members = row.children[2].textContent.toLocaleLowerCase()
-        const evals = row.children[3].textContent.toLowerCase();
+        const evals = row.children[3].textContent.toLowerCase()
 
-        const match = course.includes(query) || group.includes(query) || members.includes(query) || evals.includes(query);
-        row.style.display = match ? '' : 'none';
-      });
-    });
+        const match = course.includes(query) || group.includes(query) || members.includes(query) || evals.includes(query)
+        row.style.display = match ? '' : 'none'
+      })
+    })
 
-    const userEmail = localStorage.getItem('userEmail');
+    const userEmail = localStorage.getItem('userEmail')
     if (userEmail) {
-      document.getElementById('userEmailHeader').textContent = userEmail;
+      document.getElementById('userEmailHeader').textContent = userEmail
     } else {
-      document.getElementById('userEmailHeader').textContent = 'No email found';
+      document.getElementById('userEmailHeader').textContent = 'No email found'
     }
 
   </script>
