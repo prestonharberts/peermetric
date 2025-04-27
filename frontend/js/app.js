@@ -5,7 +5,6 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
   let strErrorRequired = ""
 
   const regEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-  const regPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/
 
   let strLoginType = document.querySelector("#txtLoginType").value
 
@@ -22,10 +21,6 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
   if (!document.querySelector("#txtPasswordLogin").value) {
     strErrorRequired += "password, "
   }
-  else if (!regPassword.test(strPassword)) {
-    strErrorMessage += `<p>Please enter a valid password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>`
-  }
-
   strErrorRequired = strErrorRequired.replace(/, $/, "");
   // ChatGPT helped me come up with this regex to replace the last comma with an "and"
   strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ");
@@ -49,13 +44,22 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
     })
   }
   else {
-    if (strLoginType == 'Student login') {
+    if (sampleUsers[strEmail] && sampleUsers[strEmail].password === strPassword) {
+      localStorage.setItem('userName', sampleUsers[strEmail].name);
       localStorage.setItem('userEmail', strEmail);
-      window.location.href = 'student.html';
-    }
-    else if (strLoginType == 'Faculty login') {
-      localStorage.setItem('userEmail', strEmail);
-      window.location.href = 'faculty.html';
+
+      if (strLoginType == 'Student login') {
+        window.location.href = 'student.html';
+      } else if (strLoginType == 'Faculty login') {
+        window.location.href = 'faculty.html';
+      }
+    } else {
+      Swal.fire({
+        title: 'Error!',
+        html: '<p>Incorrect email or password</p>',
+        icon: 'error',
+        confirmButtonText: 'Close'
+      });
     }
   }
 })
