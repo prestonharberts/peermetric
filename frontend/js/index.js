@@ -45,8 +45,11 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
   }
   else {
     if (sampleUsers[strEmail] && sampleUsers[strEmail].password === strPassword) {
-      localStorage.setItem('userName', sampleUsers[strEmail].name)
-      localStorage.setItem('userEmail', strEmail)
+      if (sampleUsers[strEmail].preferredName) {
+        localStorage.setItem('userName', sampleUsers[strEmail].preferredName)
+      } else {
+        localStorage.setItem('userName', sampleUsers[strEmail].name)
+      }
 
       if (strLoginType == 'Student login') {
         window.location.href = 'student.html'
@@ -170,18 +173,14 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
       newUser.discord = strDiscord
     }
 
-    // Add the new user to the sampleUsers object
     sampleUsers[strEmail] = newUser
+    localStorage.setItem('userName', sampleUsers[strEmail].name)
 
-    // Log the updated sampleUsers object to the console
-    console.log(sampleUsers)
 
     // Redirect logic
     if (strRegisterType == 'Student account') {
-      localStorage.setItem('userEmail', strEmail)
       window.location.href = 'student.html'
     } else if (strRegisterType == 'Faculty account') {
-      localStorage.setItem('userEmail', strEmail)
       window.location.href = 'faculty.html'
     }
   }
