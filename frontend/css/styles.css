@@ -6,3 +6,11 @@
   /* your styles here */
   border-radius: var(--bs-card-inner-border-radius);
 }
+
+.opacity-50 {
+  opacity: 0.5 !important;
+}
+
+.opacity-25 {
+  opacity: 0.25 !important;
+}

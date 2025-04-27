@@ -5,7 +5,6 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
   let strErrorRequired = ""
 
   const regEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-  const regPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/
 
   let strLoginType = document.querySelector("#txtLoginType").value
 
@@ -22,17 +21,13 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
   if (!document.querySelector("#txtPasswordLogin").value) {
     strErrorRequired += "password, "
   }
-  else if (!regPassword.test(strPassword)) {
-    strErrorMessage += `<p>Please enter a valid password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>`
-  }
-
-  strErrorRequired = strErrorRequired.replace(/, $/, "");
+  strErrorRequired = strErrorRequired.replace(/, $/, "")
   // ChatGPT helped me come up with this regex to replace the last comma with an "and"
-  strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ");
+  strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ")
 
   // ChatGPT helped me come up with this regex to remove a comma if it's the only one
   if ((strErrorRequired.match(/,/g) || []).length === 1) {
-    strErrorRequired = strErrorRequired.replace(",", "");
+    strErrorRequired = strErrorRequired.replace(",", "")
   }
 
   if (strErrorRequired != '') {
@@ -49,13 +44,25 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
     })
   }
   else {
-    if (strLoginType == 'Student login') {
-      localStorage.setItem('userEmail', strEmail);
-      window.location.href = 'student.html';
-    }
-    else if (strLoginType == 'Faculty login') {
-      localStorage.setItem('userEmail', strEmail);
-      window.location.href = 'faculty.html';
+    if (sampleUsers[strEmail] && sampleUsers[strEmail].password === strPassword) {
+      if (sampleUsers[strEmail].preferredName) {
+        localStorage.setItem('userName', sampleUsers[strEmail].preferredName)
+      } else {
+        localStorage.setItem('userName', sampleUsers[strEmail].name)
+      }
+
+      if (strLoginType == 'Student login') {
+        window.location.href = 'student.html'
+      } else if (strLoginType == 'Faculty login') {
+        window.location.href = 'faculty.html'
+      }
+    } else {
+      Swal.fire({
+        title: 'Error!',
+        html: '<p>Incorrect email or password</p>',
+        icon: 'error',
+        confirmButtonText: 'Close'
+      })
     }
   }
 })
@@ -70,18 +77,9 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
 
   const regEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
   const regPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/
-  const regZip = /^\d{5}(\-?\d{4})?$/
+  const regMiddleInitial = /^[a-zA-Z]$/
   const regPhone = /^\s*(?:\+?(\d{1,3}))?([-. (]*(\d{3})[-. )]*)?((\d{3})[-. ]*(\d{2,4})(?:[-.x ]*(\d+))?)\s*$/
-
-  let strZip = document.querySelector("#txtZip").value
-  if (!regZip.test(strZip) && document.querySelector("#txtZip").value) {
-    strErrorMessage += `<p>Please enter a valid ZIP code</p>`
-  }
-
-  let strPhone = document.querySelector("#txtPhone").value
-  if (!regPhone.test(strPhone) && document.querySelector("#txtPhone").value) {
-    strErrorMessage += `<p>Please enter a valid phone number</p>`
-  }
+  const regDiscord = /^[a-zA-Z0-9_]+#[0-9]{4}$/
 
   let strEmail = document.querySelector("#txtEmailRegister").value
   strEmail = strEmail.toLowerCase()
@@ -92,10 +90,34 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
   }
 
   let strPassword = document.querySelector("#txtPasswordRegister").value
+  let strPasswordConfirm = document.querySelector("#txtPasswordConfirm").value
   if (!document.querySelector("#txtPasswordRegister").value) {
     strErrorRequired += "password, "
   } else if (!regPassword.test(strPassword)) {
     strErrorMessage += `<p>Please enter a valid password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>`
+  } else if (strPassword !== strPasswordConfirm) {
+    strErrorMessage += `<p>Passwords do not match</p>`
+  }
+
+  let strFirstName = document.querySelector("#txtFirstName").value
+  let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
+  let strLastName = document.querySelector("#txtLastName").value
+  let strPreferredName = document.querySelector("#txtPreferredName").value
+  if (!regMiddleInitial.test(strMiddleInitial) && document.querySelector("#txtMiddleInitial").value) {
+    strErrorMessage += `<p>Please enter a valid middle initial</p>`
+  }
+  if (strPreferredName === strFirstName || strPreferredName === strMiddleInitial || strPreferredName === strLastName) {
+    strPreferredName = ""
+  }
+
+  let strPhone = document.querySelector("#txtPhone").value
+  if (!regPhone.test(strPhone) && document.querySelector("#txtPhone").value) {
+    strErrorMessage += `<p>Please enter a valid phone number</p>`
+  }
+
+  let strDiscord = document.querySelector("#txtDiscord").value
+  if (!regDiscord.test(strDiscord) && document.querySelector("#txtDiscord").value) {
+    strErrorMessage += `<p>Please enter a valid discord username (username#0000)</p>`
   }
 
   if (!document.querySelector("#txtFirstName").value) {
@@ -106,33 +128,13 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
     strErrorRequired += "last name, "
   }
 
-  if (!document.querySelector("#txtAddress1").value) {
-    strErrorRequired += "address, "
-  }
-
-  if (!document.querySelector("#txtCity").value) {
-    strErrorRequired += "city, "
-  }
-
-  if (!document.querySelector("#txtState").value) {
-    strErrorRequired += "state, "
-  }
-
-  if (!document.querySelector("#txtZip").value) {
-    strErrorRequired += "ZIP, "
-  }
-
-  if (!document.querySelector("#txtPhone").value) {
-    strErrorRequired += "phone number, "
-  }
-
-  strErrorRequired = strErrorRequired.replace(/, $/, "");
+  strErrorRequired = strErrorRequired.replace(/, $/, "")
   // ChatGPT helped me come up with this regex:
-  strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ");
+  strErrorRequired = strErrorRequired.replace(/,(?=[^,]*$)/, ", and ")
 
   // ChatGPT helped me come up with this regex to remove a comma if it's the only one
   if ((strErrorRequired.match(/,/g) || []).length === 1) {
-    strErrorRequired = strErrorRequired.replace(",", "");
+    strErrorRequired = strErrorRequired.replace(",", "")
   }
 
   if (strErrorRequired != '') {
@@ -149,13 +151,37 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
     })
   }
   else {
-    if (strRegisterType == 'Student account') {
-      localStorage.setItem('userEmail', strEmail);
-      window.location.href = 'student.html';
+    // Create a new user object
+    let newUser = {
+      email: strEmail,
+      password: strPassword,
+      name: strFirstName,
+      lastName: strLastName
     }
-    else if (strRegisterType == 'Faculty account') {
-      localStorage.setItem('userEmail', strEmail);
-      window.location.href = 'faculty.html';
+
+    // Add optional fields only if they are not empty
+    if (strMiddleInitial) {
+      newUser.middleInitial = strMiddleInitial
+    }
+    if (strPreferredName) {
+      newUser.preferredName = strPreferredName
+    }
+    if (strPhone) {
+      newUser.phone = strPhone
+    }
+    if (strDiscord) {
+      newUser.discord = strDiscord
+    }
+
+    sampleUsers[strEmail] = newUser
+    localStorage.setItem('userName', sampleUsers[strEmail].name)
+
+
+    // Redirect logic
+    if (strRegisterType == 'Student account') {
+      window.location.href = 'student.html'
+    } else if (strRegisterType == 'Faculty account') {
+      window.location.href = 'faculty.html'
     }
   }
 
