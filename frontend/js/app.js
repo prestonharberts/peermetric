@@ -86,22 +86,23 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
     strErrorMessage += `<p>Please enter a valid email address</p>`
   }
 
-  let strPassword = document.querySelector("#txtPasswordRegister").value
+  let strPassword = document.querySelector("#txtPasswordRegister").value;
+  let strPasswordConfirm = document.querySelector("#txtPasswordConfirm").value;
   if (!document.querySelector("#txtPasswordRegister").value) {
-    strErrorRequired += "password, "
+    strErrorRequired += "password, ";
   } else if (!regPassword.test(strPassword)) {
-    strErrorMessage += `<p>Please enter a valid password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>`
+    strErrorMessage += `<p>Please enter a valid password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>`;
+  } else if (strPassword !== strPasswordConfirm) {
+    strErrorMessage += `<p>Passwords do not match</p>`;
   }
 
   let strFirstName = document.querySelector("#txtFirstName").value;
   let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
   let strLastName = document.querySelector("#txtLastName").value;
   let strPreferredName = document.querySelector("#txtPreferredName").value;
-
   if (!regMiddleInitial.test(strMiddleInitial) && document.querySelector("#txtMiddleInitial").value) {
     strErrorMessage += `<p>Please enter a valid middle initial</p>`
   }
-
   if (strPreferredName === strFirstName || strPreferredName === strMiddleInitial || strPreferredName === strLastName) {
     strPreferredName = "";
   }
