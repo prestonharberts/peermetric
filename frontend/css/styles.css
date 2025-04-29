@@ -1,3 +1,25 @@
+a {
+  text-decoration: none;
+}
+
+/* these pill buttons styles were ChatGPT generated */
+.pill-button {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  color: #0366d6;
+  background-color: #edf5fb;
+  border: none;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.pill-button:hover {
+  background-color: #dbeaf8;
+  text-decoration: none;
+}
+
 .form-control {
   color: var(--bs-secondary-color);
 }
