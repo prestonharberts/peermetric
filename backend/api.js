@@ -272,9 +272,39 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
     }
 })
 
+// Add student to course
+// POST /course/:courseId/student/:studentId
+// with cookie SESSION_ID
+// Returns 201 Created if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.post('/course/:courseId/student/:studentId', validateSession, (req, res, next) => {
+    // TODO add permission validation, actual validation, and add student to course
+    if(req.params.courseId && req.params.studentId) {
+        res.status(201)
+    } else {
+        res.status(400)
+    }
+})
+
+// Remove student from course
+// DELETE /course/:courseId/student/:studentId
+// with cookie SESSION_ID
+// Returns 201 Created if successfully removed
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.delete('/course/:courseId/student/:studentId', validateSession, (req, res, next) => {
+    // TODO add permission validation, actual validation, and remove student from course
+    if(req.params.courseId && req.params.studentId) {
+        res.status(201)
+    } else {
+        res.status(400)
+    }
+})
+
 // GROUP //
 
-// Create group
+// Add a to the course group
 // POST /course/:courseId/group
 // with cookie SESSION_ID
 // Returns 201 Created if successful
@@ -286,14 +316,14 @@ app.post('/course/:courseId/group', validateSession, (req, res, next) => {
 })
 
 // Update group
-// PUT /course/:courseId/group/:groupId
+// PUT /group/:groupId
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.put('/course/:courseId/group/:groupId', validateSession, (req, res, next) => {
+app.put('/group/:groupId', validateSession, (req, res, next) => {
     // TODO add actual validation and group update
-    if(req.params.courseId && req.params.groupId) {
+    if(req.params.groupId) {
         res.status(201)
     } else {
         res.status(400)
@@ -301,7 +331,7 @@ app.put('/course/:courseId/group/:groupId', validateSession, (req, res, next) =>
 })
 
 // Read group
-// GET /course/:courseId/group/:groupId
+// GET /group/:groupId
 // with cookie SESSION_ID
 // Returns 200 OK and group object if successful
 // Returns 401 Unauthorized if the session doesn't exist
@@ -314,9 +344,9 @@ app.put('/course/:courseId/group/:groupId', validateSession, (req, res, next) =>
 //     "studentId1"
 //   ]
 // }
-app.get('/course/:courseId/group/:groupId', validateSession, (req, res, next) => {
+app.get('/group/:groupId', validateSession, (req, res, next) => {
     // TODO add actual validation and group read
-    if(req.params.courseId && req.params.groupId) {
+    if(req.params.groupId) {
         res.status(200).json({
             groupId: "groupId",
             groupName: "Group 1",
@@ -331,18 +361,52 @@ app.get('/course/:courseId/group/:groupId', validateSession, (req, res, next) =>
 })
 
 // Delete group
-// DELETE /course/:courseId/group/:groupId
+// DELETE /group/:groupId
 // with cookie SESSION_ID
 // Returns 201 Created if successfully deleted
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.delete('/course/:courseId/group/:groupId', validateSession, (req, res, next) => {
+app.delete('/group/:groupId', validateSession, (req, res, next) => {
     // TODO add actual validation and group delete
-    if(req.params.courseId && req.params.groupId) {
+    if(req.params.groupId) {
         res.status(201)
     } else {
         res.status(400)
     }
+})
+
+// Add student to group
+// POST /group/:groupId/student/:studentId
+// with cookie SESSION_ID
+// Returns 201 Created if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.post('/group/:groupId/student/:studentId', validateSession, (req, res, next) => {
+    // TODO add actual validation and add student to group
+    if(req.params.groupId && req.params.studentId) {
+        res.status(201)
+    } else {
+        res.status(400)
+    }
+})
+
+// Remove student from group
+// DELETE /group/:groupId/student/:studentId
+// with cookie SESSION_ID
+// Returns 201 Created if successfully removed
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.delete('/group/:groupId/student/:studentId', validateSession, (req, res, next) => {
+    // TODO add actual validation and remove student from group
+    if(req.params.groupId && req.params.studentId) {
+        res.status(201)
+    } else {
+        res.status(400)
+    }
+})
+
+app.get('/coffee', (req, res, next) => {
+    res.status(418)
 })
 
 // Listen
