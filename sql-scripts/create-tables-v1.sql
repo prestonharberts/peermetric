@@ -2,8 +2,8 @@
 
 CREATE TABLE `tblCourses` (
   `CourseID` text NOT NULL,
-  `CourseCode` text NOT NULL,
   `CourseName` text NOT NULL,
+  `CourseInstructor` text NOT NULL,
   `CourseDescription` text,
   PRIMARY KEY (`CourseID`)
 );
