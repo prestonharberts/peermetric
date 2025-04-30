@@ -11,9 +11,9 @@
 // Set global variables for connection info
 
 // Set to SECURE to TRUE if testing with SSL
-const SECURE = false;
-//const REMOTE_SERVER = "peermetric.goose-games.com";
-const REMOTE_SERVER = "localhost";
+const SECURE = true;
+const REMOTE_SERVER = "peermetric.goose-games.com";
+// const REMOTE_SERVER = "localhost";
 const REMOTE_PORT = "1025";
 var BASE_URL = ""
 if (SECURE)
@@ -71,7 +71,7 @@ async function CreateSession()
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "same-origin", // REQUIRED for browser to store cookie!!
+            credentials: "include", // REQUIRED for browser to store cookie!!
             body: JSON.stringify({
                 email: "jdoe@example.com",
                 password: "Password123!"
