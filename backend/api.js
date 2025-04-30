@@ -3,11 +3,11 @@ const cors = require('cors')
 const {v4:uuidv4} = require('uuid')
 const bcrypt = require('bcrypt')
 
-
 const PORT = 1025
 const app = express()
 app.use(cors())
 app.use(express.json())
+
 
 // SESSION //
 
@@ -60,12 +60,12 @@ app.delete('/session', validateSession, (req, res, next) => {
 
 // Create user
 // POST /user
-// with body.email body.passwordHash body.firstName body.lastName body.title body.contactInfo
+// with body.email body.passwordHash body.firstName body.lastName body.title body.phoneNumber body.otherContacts
 // Returns 201 Created if successful
 // Returns 400 Bad Request otherwise
 app.post('/user', (req, res, next) => {
     // TODO add actual validation and user creation
-    if(req.body.email && req.body.passwordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.contactInfo) {
+    if(req.body.email && req.body.passwordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.phoneNumber && req.body.otherContacts) {
         res.status(201)
     } else {
         res.status(400)
@@ -74,14 +74,14 @@ app.post('/user', (req, res, next) => {
 
 // Update user
 // PUT /user
-// with body.email body.newPasswordHash body.firstName body.lastName body.title body.contactInfo
+// with body.email body.newPasswordHash body.firstName body.lastName body.title body.phoneNumber body.otherContacts
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
 app.put('/user', validateSession, (req, res, next) => {
     // TODO add actual validation and user update
-    if(req.body.email && req.body.newPasswordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.contactInfo) {
+    if(req.body.email && req.body.newPasswordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.phoneNumber && req.body.otherContacts) {
         res.status(201)
     } else {
         res.status(400)
@@ -100,7 +100,8 @@ app.put('/user', validateSession, (req, res, next) => {
 //   firstName: string,
 //   lastName: string,
 //   title: string,
-//   contactInfo: string
+//   phoneNumber: string,
+//   otherContacts: string
 // }
 app.get('/user', validateSession, (req, res, next) => {
     // TODO get user from session
@@ -110,7 +111,8 @@ app.get('/user', validateSession, (req, res, next) => {
         firstName: "John",
         lastName: "Doe",
         title: "Mr.",
-        contactInfo: "123-456-7890"
+        phoneNumber: "123-456-7890",
+        otherContacts: "discord: JohnDoe#1234"
     })
 })
 
@@ -126,7 +128,8 @@ app.get('/user', validateSession, (req, res, next) => {
 //   firstName: string,
 //   lastName: string,
 //   title: string,
-//   contactInfo: string
+//   phoneNumber: string,
+//   otherContacts: string
 // }
 app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
     // TODO validate userId and get user
@@ -136,7 +139,8 @@ app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
         firstName: "Jill",
         lastName: "Doe",
         title: "Ms.",
-        contactInfo: "123-456-0987"
+        phoneNumber: "123-456-0987",
+        otherContacts: "discord: JillDoe#1234"
     })
 })
 
@@ -152,7 +156,8 @@ app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
 //   firstName: string,
 //   lastName: string,
 //   title: string,
-//   contactInfo: string
+//   phoneNumber: string,
+//   otherContacts: string
 // }
 app.get('/user/byEmail/:email', validateSession, (req, res, next) => {
     // TODO validate email and get user
@@ -162,7 +167,8 @@ app.get('/user/byEmail/:email', validateSession, (req, res, next) => {
         firstName: "Jill",
         lastName: "Doe",
         title: "Ms.",
-        contactInfo: "123-456-0987"
+        phoneNumber: "123-456-0987",
+        otherContacts: "discord: JillDoe#1234"
     })
 })
 
@@ -273,7 +279,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
 })
 
 // Add student to course
-// POST /course/:courseId/student/:studentId
+// POST /course/{courseId}/student/{studentId}
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
@@ -288,7 +294,7 @@ app.post('/course/:courseId/student/:studentId', validateSession, (req, res, nex
 })
 
 // Remove student from course
-// DELETE /course/:courseId/student/:studentId
+// DELETE /course/{courseId}/student/{studentId}
 // with cookie SESSION_ID
 // Returns 201 Created if successfully removed
 // Returns 401 Unauthorized if the session doesn't exist
@@ -304,19 +310,19 @@ app.delete('/course/:courseId/student/:studentId', validateSession, (req, res, n
 
 // GROUP //
 
-// Add a to the course group
-// POST /course/:courseId/group
+// Add a group to the course
+// POST /course/{courseId}/group
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
 app.post('/course/:courseId/group', validateSession, (req, res, next) => {
     // TODO add actual validation and group creation
-    res.status(201)
+    res.status(201).json({groupId: "groupId"})
 })
 
 // Update group
-// PUT /group/:groupId
+// PUT /group/{groupId}
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
@@ -331,7 +337,7 @@ app.put('/group/:groupId', validateSession, (req, res, next) => {
 })
 
 // Read group
-// GET /group/:groupId
+// GET /group/{groupId}
 // with cookie SESSION_ID
 // Returns 200 OK and group object if successful
 // Returns 401 Unauthorized if the session doesn't exist
@@ -361,7 +367,7 @@ app.get('/group/:groupId', validateSession, (req, res, next) => {
 })
 
 // Delete group
-// DELETE /group/:groupId
+// DELETE /group/{groupId}
 // with cookie SESSION_ID
 // Returns 201 Created if successfully deleted
 // Returns 401 Unauthorized if the session doesn't exist
@@ -376,7 +382,7 @@ app.delete('/group/:groupId', validateSession, (req, res, next) => {
 })
 
 // Add student to group
-// POST /group/:groupId/student/:studentId
+// POST /group/{groupId}/student/{studentId}
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
@@ -391,7 +397,7 @@ app.post('/group/:groupId/student/:studentId', validateSession, (req, res, next)
 })
 
 // Remove student from group
-// DELETE /group/:groupId/student/:studentId
+// DELETE /group/{groupId}/student/{studentId}
 // with cookie SESSION_ID
 // Returns 201 Created if successfully removed
 // Returns 401 Unauthorized if the session doesn't exist
@@ -399,6 +405,171 @@ app.post('/group/:groupId/student/:studentId', validateSession, (req, res, next)
 app.delete('/group/:groupId/student/:studentId', validateSession, (req, res, next) => {
     // TODO add actual validation and remove student from group
     if(req.params.groupId && req.params.studentId) {
+        res.status(201)
+    } else {
+        res.status(400)
+    }
+})
+
+// REVIEW SPEC //
+
+// Create review spec
+// POST /course/{courseId}/reviewSpec
+// with body.liveDate body.expiryDate
+// with cookie SESSION_ID
+// Returns 201 Created if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.post('/course/:courseId/reviewSpec', validateSession, (req, res, next) => {
+    // TODO add actual validation and review spec creation
+    if(req.params.courseId && req.body.liveDate && req.body.expiryDate) {
+        res.status(201).json({reviewSpecId: "reviewSpecId"})
+    } else {
+        res.status(400)
+    }
+})
+
+// Update review spec
+// PUT /reviewSpec/{reviewSpecId}
+// with cookie SESSION_ID
+// Returns 201 Created if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.put('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
+    // TODO add actual validation and review spec update
+    if(req.params.reviewSpecId) {
+        res.status(201)
+    } else {
+        res.status(400)
+    }
+})
+
+// Read review spec
+// GET /reviewSpec/{reviewSpecId}
+// with cookie SESSION_ID
+// Returns 200 OK and review spec object if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Review spec object:
+// {
+//   reviewSpecId: string,
+//   courseId: string,
+//   liveDate: string,
+//   expiryDate: string,
+// }
+app.get('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
+    // TODO add actual validation and review spec read
+    if(req.params.reviewSpecId) {
+        res.status(200).json({
+            reviewSpecId: "reviewSpecId",
+            courseId: "courseId",
+            liveDate: "UnixTimestamp",
+            expiryDate: "UnixTimestamp"
+        })
+    } else {
+        res.status(400)
+    }
+})
+
+// Delete review spec
+// DELETE /reviewSpec/{reviewSpecId}
+// with cookie SESSION_ID
+// Returns 201 Created if successfully deleted
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.delete('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
+    // TODO add actual validation and review spec delete
+    if(req.params.reviewSpecId) {
+        res.status(201)
+    } else {
+        res.status(400)
+    }
+})
+
+// RESPONSE //
+
+// Create response
+// POST /group/{groupId}/response/
+// with body.reviewSpecId body.reviewerId body.targetId body.publicFeedback body.privateFeedback
+// with cookie SESSION_ID
+// Returns 201 Created if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.post('/group/:groupId/response', validateSession, (req, res, next) => {
+    // TODO add actual validation and response creation
+    if(req.params.groupId && req.body.reviewSpecId && req.body.reviewerId && req.body.targetId && req.body.publicFeedback && req.body.privateFeedback) {
+        res.status(201).json({responseId: "responseId"})
+    } else {
+        res.status(400)
+    }
+})
+
+// Get public response
+// GET /response/{responseId}
+// with cookie SESSION_ID
+// Returns 200 OK and response object if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Response object:
+// {
+//   responseId: string,
+//   reviewSpecId: string,
+//   reviewerId: string,
+//   targetId: string,
+//   publicFeedback: string,
+// }
+app.get('/response/:responseId', validateSession, (req, res, next) => {
+    // TODO add actual validation and response read
+    if(req.params.responseId) {
+        res.status(200).json({
+            responseId: "responseId",
+            reviewSpecId: "reviewSpecId",
+            reviewerId: "reviewerId",
+            targetId: "targetId",
+            publicFeedback: "publicFeedback"
+        })
+    } else {
+        res.status(400)
+    }
+})
+
+// Get private response
+// GET /response/{responseId}/private
+// with cookie SESSION_ID
+// Returns 200 OK and response object if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Response object:
+// {
+//   responseId: string,
+//   reviewSpecId: string,
+//   reviewerId: string,
+//   targetId: string,
+//   publicFeedback: string,
+//   privateFeedback: string,
+// }
+app.get('/response/:responseId/private', validateSession, (req, res, next) => {
+    // TODO add actual validation and response read
+    if(req.params.responseId) {
+        res.status(200).json({
+            responseId: "responseId",
+            reviewSpecId: "reviewSpecId",
+            reviewerId: "reviewerId",
+            targetId: "targetId",
+            publicFeedback: "publicFeedback",
+            privateFeedback: "privateFeedback"
+        })
+    } else {
+        res.status(400)
+    }
+})
+
+// Delete response
+// DELETE /response/{responseId}
+// with cookie SESSION_ID
+// Returns 201 Created if successfully deleted
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 400 Bad Request otherwise
+app.delete('/response/:responseId', validateSession, (req, res, next) => {
+    // TODO add actual validation and response delete
+    if(req.params.responseId) {
         res.status(201)
     } else {
         res.status(400)
