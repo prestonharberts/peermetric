@@ -7,10 +7,11 @@ const cookieParser = require('cookie-parser') // Populates req.cookies
 const PORT = 1025
 const app = express()
 app.use(cors({
-    origin: "peermetric.goose-games.com",
+    origin: "https://peermetric.goose-games.com",
     allowedHeaders: [
         "Content-Type"
-    ]
+    ],
+    credentials: true
 }))
 app.use(express.json())
 app.use(cookieParser())
