@@ -2,12 +2,13 @@ const express = require('express')
 const cors = require('cors')
 const {v4:uuidv4} = require('uuid')
 const bcrypt = require('bcrypt')
+const cookieParser = require('cookie-parser') // Populates req.cookies
 
 const PORT = 1025
 const app = express()
 app.use(cors())
 app.use(express.json())
-
+app.use(cookieParser())
 
 // SESSION //
 
@@ -15,13 +16,15 @@ app.use(express.json())
 // with cookie SESSION_ID
 // Returns 401 Unauthorized if the session doesn't exist
 function validateSession(req, res, next){
+    console.log(req.cookies)
     // TODO add actual validation
-    if(sessionID == null) {
-        res.status(401)
-        return
-    } else {
-        next()
-    }
+    next()
+    // if(sessionID == null) {
+    //     res.status(401)
+    //     return
+    // } else {
+    //     next()
+    // }
 }
 
 // Create session
@@ -34,14 +37,14 @@ app.post('/session', (req, res, next) => {
     if(req.body.email != null && req.body.password != null) {
         const sessionId = uuidv4()
         res.cookie('SESSION_ID', sessionId, {
-            httpOnly: true,
+            //httpOnly: true,
             maxAge: 12 * 60 * 60 * 1000, //12 hours
             sameSite: 'Strict',
             secure: false // Set to true with HTTPS
         })
-        res.status(201)
+        res.status(201).json({message: "Cookie Sent!"})
     } else {
-        res.status(401)
+        return res.status(401).json({message: "Invalid Credentials!"})
     }
 })
 
@@ -577,7 +580,7 @@ app.delete('/response/:responseId', validateSession, (req, res, next) => {
 })
 
 app.get('/coffee', (req, res, next) => {
-    res.status(418)
+    res.status(418).json({message: "Connection OK!"})
 })
 
 // Listen
