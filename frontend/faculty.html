@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:,">
   <!-- PAGE TITLE -->
-  <title>Faculty – RateMyTeam</title>
+  <title>Faculty – Peermetric</title>
   <!-- SITE ICON -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <!-- CSS STYLESHEETS -->
@@ -32,13 +32,13 @@
         <h3 class="mb-0">
           <span class="fw-bold">Faculty</span>
           <span class="opacity-75 fw-light">|</span>
-          <span class="opacity-50 fw-light">RateMyTeam</span>
+          <span class="opacity-50 fw-light">Peermetric</span>
         </h3>
       </div>
       <div class="col text-end">
         <a href="index.html" style="text-decoration: none;">
           <h5 class="mb-0 text-primary">
-            <u>Log out</u>
+            Log out
           </h5>
         </a>
       </div>
@@ -209,30 +209,27 @@
 
     </div>
 
-    <!-- SURVEY RESULTS TABLE -->
+    <!-- COURSE LIST TABLE -->
     <div class="card shadow mb-3">
       <div class="card-header bg-primary text-light">
-        <b>Survey Results</b>
+        <b>Course List</b>
       </div>
 
       <div class="card-body">
         <!-- search box -->
-        <!-- <input type="text" id="surveySearch" class="form-control mb-3" placeholder="Search course, group, member..." aria-label="search survey results" /> -->
+        <!-- <input type="text" id="surveySearch" class="form-control mb-3" placeholder="Search course, group, member..." aria-label="search course list" /> -->
         <div class="table-responsive">
-          <table class="table table-bordered" id="surveyTable">
+          <table class="table table-bordered">
             <thead class="thead-dark">
               <tr>
                 <th>Course</th>
+                <th>Name</th>
+                <th>Summary</th>
+                <th>Students</th>
                 <th>Evaluations</th>
-                <th>Alerts</th>
               </tr>
             </thead>
-            <tbody id="surveyTableBody">
-              <tr>
-                <td>CSC 3100-001</td>
-                <td>6 submitted, 2 not finished <span class="text-primary">(details)</span></td>
-                <td>No alerts at this time</td>
-              </tr>
+            <tbody id="courseList">
             </tbody>
           </table>
         </div>
@@ -247,33 +244,18 @@
 
       <div class="card-body">
         <!-- search box -->
-        <input type="text" id="txtSearchGroups" class="form-control mb-3" placeholder="Search course, group, member, notes..." aria-label="search tasks" />
+        <input type="text" id="txtSearchGroups" class="form-control mb-3" placeholder="Search course, group, member..." aria-label="search tasks" />
         <div class="table-responsive">
-          <table class="table table-bordered" id="taskTable">
+          <table class="table table-bordered">
             <thead class="thead-dark">
               <tr>
                 <th>Course</th>
                 <th>Group</th>
                 <th>Members</th>
                 <th>Evaluations</th>
-                <th>Notes</th>
               </tr>
             </thead>
-            <tbody id="taskList">
-              <tr>
-                <td>CSC 3100-001</td>
-                <td>Group 1</td>
-                <td>Preston, Kyle</td>
-                <td>3 submitted, 1 not finished <span class="text-primary">(details)</span></td>
-                <td>Deserve an A for current project</td>
-              </tr>
-              <tr>
-                <td>CSC 3100-001</td>
-                <td>Group 2</td>
-                <td>Ezra, Javontae</td>
-                <td>3 submitted, 1 not finished <span class="text-primary">(details)</span></td>
-                <td>Should use Vim to boost productivity</td>
-              </tr>
+            <tbody id="groupList">
             </tbody>
         </div>
       </div>
@@ -283,6 +265,7 @@
   <!-- JS SCRIPTS -->
   <script src="js/lib/bootstrap.bundle.min.js"></script>
   <script src="js/lib/sweetalert2.all.min.js"></script>
+  <script src="js/faculty.js"></script>
   <script src="js/sample-data.js"></script>
   <script>
     document.getElementById('txtSearchGroups').addEventListener('input', function () {
@@ -306,6 +289,9 @@
     } else {
       document.getElementById('userNameHeader').textContent = 'No name found'
     }
+
+    populateCourseList(sampleCourses, sampleStudents, sampleGroups, sampleResponses)
+    populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleResponses);
 
   </script>
 </body>
