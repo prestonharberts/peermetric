@@ -4,7 +4,7 @@ const {v4:uuidv4} = require('uuid')
 const bcrypt = require('bcrypt')
 const cookieParser = require('cookie-parser') // Populates req.cookies
 
-const PORT = 1025
+const PORT = 4433
 const app = express()
 app.use(cors({
     origin: "https://peermetric.goose-games.com",
