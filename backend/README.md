@@ -9,6 +9,15 @@ This document describes the available endpoints for the Express-based API.
 **Request Body:**  
 - `email`: string  
 - `password`: string  
+**Sample Request:**
+```js
+fetch('http://10.143.131.118:1025/session', {
+      method: "POST",
+      headers: {"Content-Type":"Application/JSON"},
+      credentials: "include",
+      body: JSON.stringify({email:"lol", password:"lol"})
+      }).then(response => {return response.json()}).catch(error => {console.log(error)})
+```
 
 **Responses:**  
 - `201 Created`: Session created with `SESSION_ID` cookie  
