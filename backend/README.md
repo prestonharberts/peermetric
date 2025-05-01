@@ -9,6 +9,7 @@ This document describes the available endpoints for the Express-based API.
 **Request Body:**  
 - `email`: string  
 - `password`: string  
+
 **Sample Request:**
 ```js
 fetch('http://{IP}:{PORT}/session', {
