@@ -2,12 +2,32 @@ const express = require('express')
 const cors = require('cors')
 const {v4:uuidv4} = require('uuid')
 const bcrypt = require('bcrypt')
+const cookieParser = require('cookie-parser')
+const sqlite3 = require('sqlite3').verbose()
 
 const PORT = 1025
 const app = express()
-app.use(cors())
+app.use(cors(
+    {
+        // "origin": [
+        //     "http://localhost:5500",
+        //     "http://127.0.0.1:5500", // These two localhost ones may not work. Add below entry to hostfile?
+        //     "http://peermetric.com:5500",
+        // ],
+        "origin": function (origin, callback) {
+            callback(null, true)
+        },
+        "allowedHeaders": [
+            "Content-Type"
+        ],
+        "credentials": true
+    }
+))
 app.use(express.json())
+app.use(cookieParser())
 
+// Make database object
+const db = new sqlite3.Database('../peermetric-0.1.db')
 
 // SESSION //
 
@@ -17,7 +37,7 @@ app.use(express.json())
 function validateSession(req, res, next){
     // TODO add actual validation
     if(sessionID == null) {
-        res.status(401)
+        res.status(401).json({})
         return
     } else {
         next()
@@ -39,9 +59,9 @@ app.post('/session', (req, res, next) => {
             sameSite: 'Strict',
             secure: false // Set to true with HTTPS
         })
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(401)
+        res.status(401).json({})
     }
 })
 
@@ -53,7 +73,7 @@ app.post('/session', (req, res, next) => {
 app.delete('/session', validateSession, (req, res, next) => {
     res.clearCookie('SESSION_ID')
     // TODO revoke session in sqlite db
-    res.status(205)
+    res.status(205).json({})
 })
 
 // USER //
@@ -66,9 +86,9 @@ app.delete('/session', validateSession, (req, res, next) => {
 app.post('/user', (req, res, next) => {
     // TODO add actual validation and user creation
     if(req.body.email && req.body.passwordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.phoneNumber && req.body.otherContacts) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -82,9 +102,9 @@ app.post('/user', (req, res, next) => {
 app.put('/user', validateSession, (req, res, next) => {
     // TODO add actual validation and user update
     if(req.body.email && req.body.newPasswordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.phoneNumber && req.body.otherContacts) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -182,9 +202,9 @@ app.get('/user/byEmail/:email', validateSession, (req, res, next) => {
 app.delete('/user', validateSession, (req, res, next) => {
     // TODO add actual validation and delete user
     if(req.body.password) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -202,7 +222,7 @@ app.post('/course', validateSession, (req, res, next) => {
     if(req.body.courseCode && req.body.friendlyName) {
         res.status(201).json({courseId: "courseId"})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -216,9 +236,9 @@ app.post('/course', validateSession, (req, res, next) => {
 app.put('/course/:courseId', validateSession, (req, res, next) => {
     // TODO add permission validation, actual validation, and course update
     if(req.params.courseId && req.body.courseCode && req.body.friendlyName && req.body.groupList && req.body.studentList) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -259,7 +279,7 @@ app.get('/course/:courseId', validateSession, (req, res, next) => {
             ]
         })
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -272,9 +292,9 @@ app.get('/course/:courseId', validateSession, (req, res, next) => {
 app.delete('/course/:courseId', validateSession, (req, res, next) => {
     // TODO add permission validation, actual validation, and delete course
     if(req.params.courseId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -287,9 +307,9 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
 app.post('/course/:courseId/student/:studentId', validateSession, (req, res, next) => {
     // TODO add permission validation, actual validation, and add student to course
     if(req.params.courseId && req.params.studentId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -302,9 +322,9 @@ app.post('/course/:courseId/student/:studentId', validateSession, (req, res, nex
 app.delete('/course/:courseId/student/:studentId', validateSession, (req, res, next) => {
     // TODO add permission validation, actual validation, and remove student from course
     if(req.params.courseId && req.params.studentId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -330,9 +350,9 @@ app.post('/course/:courseId/group', validateSession, (req, res, next) => {
 app.put('/group/:groupId', validateSession, (req, res, next) => {
     // TODO add actual validation and group update
     if(req.params.groupId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -362,7 +382,7 @@ app.get('/group/:groupId', validateSession, (req, res, next) => {
             ]
         })
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -375,9 +395,9 @@ app.get('/group/:groupId', validateSession, (req, res, next) => {
 app.delete('/group/:groupId', validateSession, (req, res, next) => {
     // TODO add actual validation and group delete
     if(req.params.groupId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -390,9 +410,9 @@ app.delete('/group/:groupId', validateSession, (req, res, next) => {
 app.post('/group/:groupId/student/:studentId', validateSession, (req, res, next) => {
     // TODO add actual validation and add student to group
     if(req.params.groupId && req.params.studentId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -405,9 +425,9 @@ app.post('/group/:groupId/student/:studentId', validateSession, (req, res, next)
 app.delete('/group/:groupId/student/:studentId', validateSession, (req, res, next) => {
     // TODO add actual validation and remove student from group
     if(req.params.groupId && req.params.studentId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -425,7 +445,7 @@ app.post('/course/:courseId/reviewSpec', validateSession, (req, res, next) => {
     if(req.params.courseId && req.body.liveDate && req.body.expiryDate) {
         res.status(201).json({reviewSpecId: "reviewSpecId"})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -438,9 +458,9 @@ app.post('/course/:courseId/reviewSpec', validateSession, (req, res, next) => {
 app.put('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
     // TODO add actual validation and review spec update
     if(req.params.reviewSpecId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -466,7 +486,7 @@ app.get('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
             expiryDate: "UnixTimestamp"
         })
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -479,9 +499,9 @@ app.get('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
 app.delete('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
     // TODO add actual validation and review spec delete
     if(req.params.reviewSpecId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -499,7 +519,7 @@ app.post('/group/:groupId/response', validateSession, (req, res, next) => {
     if(req.params.groupId && req.body.reviewSpecId && req.body.reviewerId && req.body.targetId && req.body.publicFeedback && req.body.privateFeedback) {
         res.status(201).json({responseId: "responseId"})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -527,7 +547,7 @@ app.get('/response/:responseId', validateSession, (req, res, next) => {
             publicFeedback: "publicFeedback"
         })
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -557,7 +577,7 @@ app.get('/response/:responseId/private', validateSession, (req, res, next) => {
             privateFeedback: "privateFeedback"
         })
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
@@ -570,14 +590,14 @@ app.get('/response/:responseId/private', validateSession, (req, res, next) => {
 app.delete('/response/:responseId', validateSession, (req, res, next) => {
     // TODO add actual validation and response delete
     if(req.params.responseId) {
-        res.status(201)
+        res.status(201).json({})
     } else {
-        res.status(400)
+        res.status(400).json({})
     }
 })
 
 app.get('/coffee', (req, res, next) => {
-    res.status(418)
+    res.status(418).json({})
 })
 
 // Listen
