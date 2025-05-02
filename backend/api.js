@@ -7,12 +7,27 @@ const sqlite3 = require('sqlite3').verbose()
 
 const PORT = 1025
 const app = express()
-app.use(cors())
+app.use(cors(
+    {
+        // "origin": [
+        //     "http://localhost:5500",
+        //     "http://127.0.0.1:5500", // These two localhost ones may not work. Add below entry to hostfile?
+        //     "http://peermetric.com:5500",
+        // ],
+        "origin": function (origin, callback) {
+            callback(null, true)
+        },
+        "allowedHeaders": [
+            "Content-Type"
+        ],
+        "credentials": true
+    }
+))
 app.use(express.json())
 app.use(cookieParser())
 
 // Make database object
-const db = new sqlite3.Database('../peermetric.db')
+const db = new sqlite3.Database('../peermetric-0.1.db')
 
 // SESSION //
 
