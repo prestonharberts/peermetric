@@ -3,6 +3,7 @@ const cors = require('cors')
 const {v4:uuidv4} = require('uuid')
 const bcrypt = require('bcrypt')
 const cookieParser = require('cookie-parser')
+const sqlite3 = require('sqlite3').verbose()
 
 const PORT = 1025
 const app = express()
@@ -10,6 +11,8 @@ app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 
+// Make database object
+const db = new sqlite3.Database('../peermetric.db')
 
 // SESSION //
 

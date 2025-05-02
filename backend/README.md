@@ -11,7 +11,7 @@ This document describes the available endpoints for the Express-based API.
 - `password`: string  
 **Sample Request:**
 ```js
-fetch('http://10.143.131.118:1025/session', {
+fetch('http://{IP}:{PORT}/session', {
       method: "POST",
       headers: {"Content-Type":"Application/JSON"},
       credentials: "include",
