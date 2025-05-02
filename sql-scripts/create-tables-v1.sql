@@ -2,21 +2,32 @@
 
 CREATE TABLE `tblCourses` (
   `CourseID` text NOT NULL,
+  `CourseCode` text NOT NULL,
   `CourseName` text NOT NULL,
-  `CourseInstructor` text NOT NULL,
-  `CourseDescription` text,
+  `InstructorID` text NOT NULL,
   PRIMARY KEY (`CourseID`)
 );
 
 CREATE TABLE `tblUsers` (
+  `UserID` text NOT NULL,
   `Email` text NOT NULL,
   `FirstName` text NOT NULL,
   `LastName` text NOT NULL,
   `MiddleInitial` text,
   `Password` text NOT NULL,
+  PRIMARY KEY (`UserID`)
+);
+
+CREATE TABLE `tblContacts` (
+  `ContactID` text NOT NULL,
+  `UserID` text NOT NULL,
+  `DiscordID` text,
   `PhoneNumber` text,
-  `DiscordUsername` text,
-  PRIMARY KEY (`Email`)
+  `FacebookUser` text,
+  `InstagramUser` text,
+  `XUser` text,
+  PRIMARY KEY (`ContactID`),
+  FOREIGN KEY (`UserID`) REFERENCES `tblUsers` (`UserID`)
 );
 
 CREATE TABLE `tblGroups` (
@@ -36,36 +47,36 @@ CREATE TABLE `tblReviewSpecifications` (
 );
 
 CREATE TABLE `tblStudents` (
-  `UserEmail` text NOT NULL,
+  `UserID` text NOT NULL,
   `CourseCode` text NOT NULL,
   `GroupID` text,
-  FOREIGN KEY (`UserEmail`) REFERENCES `tblUsers`(`Email`),
+  FOREIGN KEY (`UserID`) REFERENCES `tblUsers`(`UserID`),
   FOREIGN KEY (`CourseCode`) REFERENCES `tblCourses`(`CourseCode`),
   FOREIGN KEY (`GroupID`) REFERENCES `tblGroups` (`GroupID`),
-  Primary Key (`UserEmail`, `CourseCode`)
+  Primary Key (`UserID`, `CourseCode`)
 );
 
 CREATE TABLE `tblResponses` (
   `ResponseID` text NOT NULL,
-  `ReviewerEmail` text NOT NULL,
-  `TargetEmail` text NOT NULL,
+  `ReviewerID` text NOT NULL,
+  `TargetID` text NOT NULL,
   `GroupID` text NOT NULL,
   `ReviewSpecID` text NOT NULL,
   `PublicFeedback` text,
   `PrivateFeedback` text,
   PRIMARY KEY (`ResponseID`),
-  FOREIGN KEY (`ReviewerEmail`) REFERENCES `tblUsers` (`Email`),
-  FOREIGN KEY (`TargetEmail`) REFERENCES `tblUsers` (`Email`),
+  FOREIGN KEY (`ReviewerID`) REFERENCES `tblUsers` (`UserID`),
+  FOREIGN KEY (`TargetID`) REFERENCES `tblUsers` (`UserID`),
   FOREIGN KEY (`GroupID`) REFERENCES `tblGroups` (`GroupID`),
   FOREIGN KEY (`ReviewSpecID`) REFERENCES `tblReviewSpecification` (`ReviewSpecID`)
 );
 
 CREATE TABLE `tblSessions` (
   `SessionID` text NOT NULL,
-  `UserEmail` text NOT NULL,
+  `UserID` text NOT NULL,
   `ExpiryDate` int NOT NULL,
   PRIMARY KEY (`SessionID`),
-  FOREIGN KEY (`UserEmail`) REFERENCES `tblUsers` (`Email`)
+  FOREIGN KEY (`UserID`) REFERENCES `tblUsers` (`UserID`)
 );
 
 

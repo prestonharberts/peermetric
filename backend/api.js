@@ -35,12 +35,23 @@ const db = new sqlite3.Database('../peermetric-0.1.db')
 // with cookie SESSION_ID
 // Returns 401 Unauthorized if the session doesn't exist
 function validateSession(req, res, next){
-    // TODO add actual validation
-    if(sessionID == null) {
+    // Validate the cookie exists
+    if(req.cookies.SESSION_ID == null) {
         res.status(401).json({})
         return
     } else {
-        next()
+        // Inquire of the database as to the truth value of the statement that one entry by the type of "Session" exists
+        let strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+        db.get(strCommand, [req.cookies.SESSION_ID], function(err, result) {
+            if(err) {
+                console.error(err)
+                res.status(500).json({})
+            } else if (result == null) {
+                res.status(401).json({})
+            } else {
+                next()
+            }
+        })
     }
 }
 
