@@ -59,18 +59,50 @@ function validateSession(req, res, next){
 // POST /session
 // with body.email and body.password
 // Returns 201 Created and cookie SESSION_ID if successful
-// Returns 401 Unauthorized otherwise
+// Returns 401 Unauthorized if unable to authenticate
+// Returns 400 Bad REquest if the session already exists
 app.post('/session', (req, res, next) => {
-    // TODO add actual authentication
+    // Make sure they don't already have a session cookie
+    if(req.cookies.SESSION_ID != null) {
+        res.status(400).json({})
+        return
+    }
+    // Validate that the email and password are not empty
     if(req.body.email != null && req.body.password != null) {
-        const sessionId = uuidv4()
-        res.cookie('SESSION_ID', sessionId, {
-            httpOnly: true,
-            maxAge: 12 * 60 * 60 * 1000, //12 hours
-            sameSite: 'Strict',
-            secure: false // Set to true with HTTPS
+        // Check the database for the credentials
+        let strCommand = `SELECT * FROM tblUsers WHERE Email = ?`
+        db.all(strCommand, [req.body.email], function(error, result){
+            if(error) {
+                console.error("DB error searching users: \n\t" + error)
+                res.status(500).json({})
+            } else{
+                // Check each matching email to see if the password matches
+                for(let i = 0; i < result.length; i++) {
+                    if(bcrypt.compareSync(req.body.password, result[i].Password)) {
+                        // Create the session
+                        let strCommand = `INSERT INTO tblSessions (SessionID, UserID, ExpiryDate) VALUES (?, ?, ?)`
+                        let strSessionId = uuidv4()
+                        let unixtimeExpireTime = Date.now() + 12 * 60 * 60 * 1000 //12 hours
+                        db.run(strCommand, [strSessionId, result[i].UserID, unixtimeExpireTime], function(error) {
+                            if(error) {
+                                console.error("DB error creating session: \n\t" + error)
+                                res.status(500).json({})
+                                return
+                            }
+                        })
+                        res.cookie('SESSION_ID', strSessionId, {
+                            httpOnly: true,
+                            expires: unixtimeExpireTime, //12 hours
+                            sameSite: 'Strict',
+                            secure: false // Set to true with HTTPS
+                        }).status(201).json({})
+                        return
+                    }
+                }
+                // No password matched :(
+                res.status(401).json({})
+            }
         })
-        res.status(201).json({})
     } else {
         res.status(401).json({})
     }
