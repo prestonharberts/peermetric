@@ -209,24 +209,6 @@ app.post('/user', (req, res, next) => {
     }
 })
 
-/*
-    // All fields are required right now
-    fetch('http://peermetric.com:1025/user', 
-    {
-        method: "POST",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include",
-        body: JSON.stringify({
-            "email": "jdoe@example.com",
-            "firstName": "John",
-            "lastName": "Doe",
-            "middleInitial": "R",
-            "password": "Password123",
-            "bio": "I am a user with the discord tag user#8573"
-        })
-    })
-*/
-
 // Update user
 // PUT /user
 // with body.email body.newPasswordHash body.firstName body.lastName body.title body.phoneNumber body.otherContacts
@@ -538,8 +520,8 @@ app.put('/course/:courseId', validateSession, (req, res, next) => {
 //   ]
 // }
 app.get('/course/:courseId', validateSession, (req, res, next) => {
-    // TODO add validation and get course
-    if(req.params.courseId) {
+    // v A l I d A t E
+    if(regexUUID.test(req.params.courseId)) {
         // TODO validate courseId and get course
         res.status(200).json({
             ownerId: "ownerId",
@@ -554,10 +536,94 @@ app.get('/course/:courseId', validateSession, (req, res, next) => {
                 "studentId1"
             ]
         })
+        // Check if the course is owned by or accessible to the current user
+        let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+        db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+            if(error) {
+                // Cringe
+                console.error("DB error searching sessions: \n\t" + error)
+                res.status(500).json({})
+                return
+            } else {
+                const strUserId = result.UserID
+                // User is owner of course?
+                let strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
+                db.get(strCommand, [req.params.courseID], function(error, result) {
+                    if(error) {
+                        console.error("DB error searching courses: \n\t" + error)
+                        res.status(500).json({})
+                        return
+                    } else if(result.OwnerID == strUserId) {
+                        // User owns the course
+                        res.status(200).json(compileCourseObject(req.params.courseId))
+                        return
+                    } else {
+                        // User is student in course?
+                        strCommand = `SELECT * FROM tblStudents WHERE CourseID = ? AND StudentID = ?`
+                        db.get(strCommand, [req.params.courseId, strUserId], function(error, result) {
+                            if(error) {
+                                console.error("DB error searching courses: \n\t" + error)
+                                res.status(500).json({})
+                                return
+                            } else if(result != null) {
+                                // User is student
+                                res.status(200).json(compileCourseObject(req.params.courseId))
+                            } else {
+                                // Bozo is not authorized to view this course
+                                res.status(401).json({user: "L Red Team"})
+                                return
+                            }
+                        })
+                    }
+                })
+                
+            }
+        })
     } else {
         res.status(400).json({})
     }
 })
+
+function compileCourseObject(courseId) {
+    // Compile the course object from the database result
+    let objCourse = {
+        ownerId: "",
+        courseCode: "",
+        friendlyName: "",
+        groupList: [],
+        studentList: []
+    }
+    let strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+    db.get(strCommand, [courseId], function(error, result) {
+        if(error) {
+            console.error("DB error searching courses: \n\t" + error)
+            throw error
+        } else {
+            objCourse.ownerId = result.OwnerID
+            objCourse.courseCode = result.CourseCode
+            objCourse.friendlyName = result.FriendlyName
+        }
+    })
+    strCommand = `SELECT * FROM tblGroups WHERE CourseID = ?`
+    db.all(strCommand, [courseId], function(error, result) {
+        if(error) {
+            console.error("DB error searching courses: \n\t" + error)
+            throw error
+        } else if(result != null) {
+            objCourse.groupList.push(...result.GroupID)
+        }
+    })
+    strCommand = `SELECT * FROM tblStudents WHERE CourseID = ?`
+    db.get(strCommand, [courseId], function(error, result) {
+        if(error) {
+            console.error("DB error searching courses: \n\t" + error)
+            throw error
+        } else if(result != null) {
+            objCourse.studentList.push(...result.UserID)
+        }
+    })
+    return objCourse
+}
 
 // Delete course
 // DELETE /course/{courseId}
