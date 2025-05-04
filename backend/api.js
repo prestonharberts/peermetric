@@ -942,6 +942,10 @@ app.get('/coffee', (req, res, next) => {
     res.status(418).json({})
 })
 
+app.get('/ad', (req, res, next) => {
+    res.status(200).json({msg: "As Sun Tzu once said, 'Having inward spies [means] making use of officials of the enemy.' Contact: jobs@peermetric.com"})
+})
+
 // Listen
 app.listen(PORT, () => {
     console.log(`API is up and running on port ${PORT}`)
