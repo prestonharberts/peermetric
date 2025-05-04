@@ -15,7 +15,7 @@ function populateCourseList(sampleCourses, sampleStudents, sampleGroups, sampleR
     let totalExpected = 0; // this is here because each student may have to submit multiple reviews per partner
 
     for (const group of groupsForCourse) {
-      const groupStudents = sampleStudents.filter(s => s.GroupID === group.GroupID);
+      const groupStudents = sampleStudents.filter(s => s.CourseID === group.CourseID);
       const n = groupStudents.length;
       totalStudents += n;
 
@@ -30,9 +30,7 @@ function populateCourseList(sampleCourses, sampleStudents, sampleGroups, sampleR
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><a class=pill-button href="#">${course.CourseSubject} ${course.CourseCode}-${course.CourseSection}</a></td>
-      <td>${course.CourseName}</td>
-      <td>${course.CourseDescription || 'No description available'}</td>
+      <td><a class=pill-button href="#">${course.CourseID} - ${course.CourseName}</a></td>
       <td><a class=pill-button href="#">${totalStudents} student${totalStudents !== 1 ? 's' : ''}<a href="#"></td>
       <td><a class=pill-button href="#">${totalSubmitted}/${totalExpected} submitted (${percent}%)</a></td>
     `;
@@ -50,7 +48,7 @@ function populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleRes
 
   // copilot helped create the logic here but I had to change how it all appears
   for (const student of sampleStudents) {
-    const { GroupID, CourseID, UserEmail } = student; // courseID actually equals CourseID like "CSC1310-001"
+    const { GroupID, CourseID, UserEmail } = student;
     if (!groups[GroupID]) {
       groups[GroupID] = {
         courseID: CourseID,
@@ -64,11 +62,8 @@ function populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleRes
 
   // build table rows
   for (const [groupID, groupData] of Object.entries(groups)) {
-    const course = sampleCourses.find(c => c.CourseID === groupData.courseID);
-    const courseLabel = course
-      ? `${course.CourseSubject} ${course.CourseCode}-${course.CourseSection}`
-      : groupData.courseID;
-
+    const course = sampleCourses.find(c => c.CourseID === groupData.CourseID);
+    const courseLabel = groupData.courseID;
     const memberEmails = groupData.members;
     const studentCount = memberEmails.length;
     const expectedCount = studentCount * (studentCount - 1);
@@ -97,3 +92,57 @@ function populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleRes
     groupList.appendChild(tr);
   }
 }
+
+document.getElementById("formCreateCourse").addEventListener("submit", function (e) {
+  e.preventDefault(); // prevent actual form submission
+
+  const courseID = document.getElementById("courseID").value.trim();
+  const courseName = document.getElementById("courseName").value.trim();
+  const studentText = document.getElementById("courseStudents").value.trim();
+  const semester = document.getElementById("courseSemester").value;
+
+  // Optional: handle blank fields
+  if (!courseID || !courseName || !semester) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  // Add course to course array
+  sampleCourses.push({
+    CourseID: courseID,
+    CourseName: courseName,
+  });
+
+  // Parse and sanitize student emails
+  const cleaned = studentText.replace(/,/g, " "); // remove commas
+  const emails = cleaned.split(/\s+/).filter(email => email); // split on whitespace
+
+  for (const email of emails) {
+    sampleStudents.push({
+      UserEmail: email,
+      CourseID: courseID,
+      GroupID: ""
+    });
+  }
+  console.log(sampleStudents)
+
+  // Optionally clear form
+  this.reset();
+
+  populateCourseList(sampleCourses, sampleStudents, sampleGroups, sampleResponses)
+});
+
+document.getElementById('txtSearchGroups').addEventListener('input', function () {
+  const query = this.value.toLowerCase()
+  const rows = document.querySelectorAll('#taskList tr')
+
+  rows.forEach(row => {
+    const course = row.children[0].textContent.toLowerCase()
+    const group = row.children[1].textContent.toLowerCase()
+    const members = row.children[2].textContent.toLocaleLowerCase()
+    const evals = row.children[3].textContent.toLowerCase()
+
+    const match = course.includes(query) || group.includes(query) || members.includes(query) || evals.includes(query)
+    row.style.display = match ? '' : 'none'
+  })
+})

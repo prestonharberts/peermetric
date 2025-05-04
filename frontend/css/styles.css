@@ -36,3 +36,12 @@ a {
 .opacity-25 {
   opacity: 0.25 !important;
 }
+
+textarea.form-control {
+  resize: none;
+  height: auto;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  font-size: 1rem;
+}

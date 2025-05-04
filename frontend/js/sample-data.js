@@ -38,48 +38,40 @@ const sampleUsers = {
 
 const sampleCourses = [
   {
-    CourseID: "CSC1310-001",
-    CourseSubject: "CSC",
-    CourseCode: "1310",
-    CourseSection: "001",
+    CourseID: "CSC 1310-001",
     CourseName: "Data Structures and Algorithms",
-    CourseDescription: "Learn data structures and algorithms in C++."
   },
   {
-    CourseID: "CSC3100-001",
-    CourseSubject: "CSC",
-    CourseCode: "3100",
-    CourseSection: "001",
+    CourseID: "CSC 3100-001",
     CourseName: "Web Development",
-    CourseDescription: "Learn web development with HTML, CSS, and JS."
   }
 ];
 
 const sampleGroups = [
-  { GroupID: "A1", CourseID: "CSC1310-001" },
-  { GroupID: "A2", CourseID: "CSC3100-001" }
+  { GroupID: "A1", CourseID: "CSC 1310-001" },
+  { GroupID: "A2", CourseID: "CSC 3100-001" }
 ];
 
 const sampleReviewSpecifications = [
   {
     ReviewSpecID: "R1",
-    CourseID: "CSC1310-001",
+    CourseID: "CSC 1310-001",
     LiveDate: 1714348800,   // Apr 29, 2024
     ExpiryDate: 1715039999  // May 7, 2024
   },
   {
     ReviewSpecID: "R2",
-    CourseID: "CSC3100-001",
+    CourseID: "CSC 3100-001",
     LiveDate: 1714435200,   // Apr 30, 2024
     ExpiryDate: 1715126399  // May 8, 2024
   }
 ];
 
 const sampleStudents = [
-  { UserEmail: "johndoe@tntech.edu", CourseID: "CSC1310-001", GroupID: "A1" },
-  { UserEmail: "janesmith@tntech.edu", CourseID: "CSC1310-001", GroupID: "A1" },
-  { UserEmail: "alicebrown@tntech.edu", CourseID: "CSC3100-001", GroupID: "A2" },
-  { UserEmail: "bobjohnson@tntech.edu", CourseID: "CSC3100-001", GroupID: "A2" }
+  { UserEmail: "johndoe@tntech.edu", CourseID: "CSC 1310-001", GroupID: "A1" },
+  { UserEmail: "janesmith@tntech.edu", CourseID: "CSC 1310-001", GroupID: "A1" },
+  { UserEmail: "alicebrown@tntech.edu", CourseID: "CSC 3100-001", GroupID: "A2" },
+  { UserEmail: "bobjohnson@tntech.edu", CourseID: "CSC 3100-001", GroupID: "A2" }
 ];
 
 const sampleResponses = [
