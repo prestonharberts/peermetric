@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser')
 const sqlite3 = require('sqlite3').verbose()
 
 const PORT = 1025
+const regexUUID = /[0-9A-Za-z]{8}-[0-9A-Za-z]{4}-4[0-9A-Za-z]{3}-[89ABab][0-9A-Za-z]{3}-[0-9A-Za-z]{12}/
+
 const app = express()
 app.use(cors(
   {
@@ -14,7 +16,7 @@ app.use(cors(
     //     "http://127.0.0.1:5500", // These two localhost ones may not work. Add below entry to hostfile?
     //     "http://peermetric.com:5500",
     // ],
-    "origin": function (origin, callback) {
+    "origin": function(origin, callback) {
       callback(null, true)
     },
     "allowedHeaders": [
@@ -42,18 +44,23 @@ function validateSession(req, res, next) {
   } else {
     // Inquire of the database as to the truth value of the statement that one entry by the type of "Session" exists
     let strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
-    db.get(strCommand, [req.cookies.SESSION_ID], function (err, result) {
+    db.get(strCommand, [req.cookies.SESSION_ID], function(err, result) {
       if (err) {
+        // Something went terribly wrong; use the checksum to see if a solar flare flipped some bits
         console.error(err)
         res.status(500).json({})
       } else if (result == null) {
+        // We don't know about the session
         res.status(401).json({})
+      } else if (result.ExpiryDate <= Date.now()) {
+        // Oh no! The session is expired!
+        res.clearCookie('SESSION_ID').status(401).json({})
       } else {
+        // Who's a good session? You are!
         next()
       }
     })
   }
-  // next() // db.get is an async call and next() is called up there. This line causes a race condition.
 }
 
 // Create session
@@ -72,7 +79,7 @@ app.post('/session', (req, res, next) => {
   if (req.body.email != null && req.body.password != null) {
     // Check the database for the credentials
     let strCommand = `SELECT * FROM tblUsers WHERE Email = ?`
-    db.all(strCommand, [req.body.email], function (error, result) {
+    db.all(strCommand, [req.body.email], function(error, result) {
       if (error) {
         console.error("DB error searching users: \n\t" + error)
         res.status(500).json({})
@@ -84,7 +91,7 @@ app.post('/session', (req, res, next) => {
             let strCommand = `INSERT INTO tblSessions (SessionID, UserID, ExpiryDate) VALUES (?, ?, ?)`
             let strSessionId = uuidv4()
             let unixtimeExpireTime = Date.now() + 12 * 60 * 60 * 1000 //12 hours
-            db.run(strCommand, [strSessionId, result[i].UserID, unixtimeExpireTime], function (error) {
+            db.run(strCommand, [strSessionId, result[i].UserID, unixtimeExpireTime], function(error) {
               if (error) {
                 console.error("DB error creating session: \n\t" + error)
                 res.status(500).json({})
@@ -93,8 +100,7 @@ app.post('/session', (req, res, next) => {
             })
             res.cookie('SESSION_ID', strSessionId, {
               httpOnly: true,
-              // expires: unixtimeExpireTime, //12 hours... the 'expires' field expects time in GMT
-              maxAge: 12 * 60 * 60 * 1000,
+              expires: unixtimeExpireTime, //12 hours
               sameSite: 'Strict',
               secure: false // Set to true with HTTPS
             }).status(201).json({})
@@ -109,18 +115,6 @@ app.post('/session', (req, res, next) => {
     res.status(401).json({})
   }
 })
-/*
-    fetch('http://peermetric.com:1025/session', 
-    {
-        method: "POST",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include",
-        body: JSON.stringify({
-            "email": "jdoe@example.com",
-            "password": "Password123",
-        })
-    })
-*/
 
 // Delete session
 // DELETE /session
@@ -128,10 +122,41 @@ app.post('/session', (req, res, next) => {
 // Return 205 Reset Content if the user's sessions are successfully revoked
 // Return 401 Unauthorized otherwise
 app.delete('/session', validateSession, (req, res, next) => {
-  res.clearCookie('SESSION_ID')
-  // TODO revoke session in sqlite db
-  res.status(205).json({})
+  // Delete all sessions tied to the user
+  let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+  db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    if (error) {
+      console.error("DB error searching sessions: \n\t" + error)
+      res.status(500).json({})
+    } else if (result == null) {
+      // No session found
+      res.status(401).json({})
+    } else {
+      // Delete all sessions tied to the user
+      strCommand = `DELETE FROM tblSessions WHERE UserID = ?`
+      db.run(strCommand, [result.UserID], function(error) {
+        if (error) {
+          console.error("DB error deleting sessions: \n\t" + error)
+          res.status(500).json({})
+          return
+        }
+      })
+      res.clearCookie('SESSION_ID')
+      res.status(205).json({})
+    }
+  })
 })
+
+// Remove expired sessions
+// For backend use only
+function removeExpiredSessions() {
+  let strCommand = `DELETE FROM tblSessions WHERE ExpiryDate <= ?`
+  db.run(strCommand, [Date.now()], function(error) {
+    if (error) {
+      console.error("DB error deleting expired sessions: \n\t" + error)
+    }
+  })
+}
 
 // USER //
 
@@ -145,7 +170,7 @@ app.post('/user', (req, res, next) => {
   // (eg. Don't make account twice)
 
   // If there are valid fields, make account
-  if (req.body.email && req.body.password && req.body.firstName && req.body.lastName) {
+  if (req.body.email && req.body.bio && req.body.password && req.body.firstName && req.body.lastName && req.body.middleInitial) {
     // Hash password to store in db
     const intSaltRounds = 10
     bcrypt.hash(req.body.password, intSaltRounds, (err, hash) => {
@@ -157,8 +182,8 @@ app.post('/user', (req, res, next) => {
       }
       else {
         const strNewID = uuidv4()
-        const strSqlQuery = "INSERT INTO tblUsers (UserID, Email, FirstName, LastName, MiddleInitial, PreferredName, Password, Bio) VALUES (?, ?, ?, ?, ?, ?, ?)"
-        const arrParams = [strNewID, req.body.email, req.body.firstName, req.body.lastName, req.body.middleInitial, PreferredName, hash, req.body.bio]
+        const strSqlQuery = "INSERT INTO tblUsers (UserID, Email, FirstName, LastName, MiddleInitial, Password, Bio) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        const arrParams = [strNewID, req.body.email, req.body.firstName, req.body.lastName, req.body.middleInitial, hash, req.body.bio]
         db.run(strSqlQuery, arrParams, (err) => {
           if (err) {
             console.error(err.message)
@@ -248,19 +273,11 @@ app.get('/user', validateSession, (req, res, next) => {
         firstName: result.FirstName,
         lastName: result.LastName,
         middleInitial: result.MiddleInitial,
-        preferredName: result.PreferredName,
         bio: result.Bio
       })
     }
   })
 })
-/*
-    fetch('http://peermetric.com:1025/user', {
-        method: "GET",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include"
-    })
-*/
 
 // Read user
 // GET /user/byUuid/{userId}
@@ -330,20 +347,12 @@ app.get('/user/byEmail/:email', validateSession, (req, res, next) => {
           firstName: result.FirstName,
           lastName: result.LastName,
           middleInitial: result.MiddleInitial,
-          preferredName: result.PreferredName,
           bio: result.Bio
         })
       }
     }
   })
 })
-/*
-    fetch('http://peermetric.com:1025/user/byEmail/jdoe@example.com', {
-        method: "GET",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include"
-    })
-*/
 
 // Delete current user
 // DELETE /user
@@ -377,13 +386,6 @@ app.delete('/user', validateSession, (req, res, next) => {
     }
   })
 })
-/*
-    fetch('http://peermetric.com:1025/user', {
-        method: "DELETE",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include"
-    })
-*/
 
 app.delete('/user/byEmail/', validateSession, (req, res, next) => {
   strSqlQuery = "DELETE FROM tblUsers WHERE tblUsers.Email = ?;"
@@ -404,13 +406,6 @@ app.delete('/user/byEmail/', validateSession, (req, res, next) => {
     }
   })
 })
-/*
-    fetch('http://peermetric.com:1025/user/byEmail?jdoe@example.com', {
-        method: "DELETE",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include"
-    })
-*/
 // COURSE //
 
 // Create course
@@ -421,27 +416,91 @@ app.delete('/user/byEmail/', validateSession, (req, res, next) => {
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
 app.post('/course', validateSession, (req, res, next) => {
-  // TODO add actual validation and course creation
-  if (req.body.courseCode && req.body.friendlyName) {
-    res.status(201).json({ courseId: "courseId" })
-  } else {
+  // Validate parameters
+  if (req.body.courseCode == null || req.body.friendlyName == null) {
     res.status(400).json({})
+    return
+  } else {
+    // Get the user ID from the session
+    let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+    db.get(strCommand, [req.cookies.SESSION_ID], function(err, result) {
+      if (err) {
+        console.error(err)
+        res.status(500).json({})
+      } else {
+        // Toss the info in the db
+        let strCommand = `INSERT INTO tblCourses (CourseID, CourseCode, FriendlyName, OwnerID)`
+        let strCourseId = uuidv4()
+        db.run(strCommand, [strCourseId, req.body.courseCode, req.body.friendlyName, result.UserID], function(error) {
+          if (error) {
+            console.error(error)
+            res.status(500).json({})
+          } else {
+            res.status(201).json({ courseId: strCourseId })
+          }
+        })
+      }
+    })
   }
 })
 
 // Update course
 // PUT /course/{courseId}
-// with body.courseCode(e.g. CSC 3100-001), body.friendlyName(e.g. Web Dev), body.groupList, body.studentList
+// with body.courseCode(e.g. CSC 3100-001), body.friendlyName(e.g. Web Dev)
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
+// Returns 404 Not Found if the course doesn't exist
 // Returns 400 Bad Request otherwise
 app.put('/course/:courseId', validateSession, (req, res, next) => {
-  // TODO add permission validation, actual validation, and course update
-  if (req.params.courseId && req.body.courseCode && req.body.friendlyName && req.body.groupList && req.body.studentList) {
-    res.status(201).json({})
-  } else {
+  // Validate parameters
+  if (req.body.courseCode == null || req.body.friendlyName == null || !regexUUID.test(req.params.courseId)) {
     res.status(400).json({})
+    return
+  } else {
+    // Get the user ID from the session
+    let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+    db.get(strCommand, [req.cookies.SESSION_ID], function(err, result) {
+      if (err) {
+        console.error(err)
+        res.status(500).json({})
+        return
+      } else {
+        const strUserId = result.UserID
+        // Check if the user is the owner of the course
+        let strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
+        db.get(strCommand, [req.params.courseId], function(error, result) {
+          if (error) {
+            console.error("DB error searching courses: \n\t" + error)
+            res.status(500).json({})
+            return
+          } else if (result == null) {
+            // Course not found
+            // Womp womp
+            res.status(404).json({})
+            return
+          } else if (result.OwnerID != strUserId) {
+            // Toss the info in the db
+            let strCommand = `UPDATE tblCourses SET CourseCode = ?, CourseName = ? WHERE CourseID = ?`
+            db.run(strCommand, [req.body.courseCode, req.body.friendlyName, req.params.courseId], function(error) {
+              if (error) {
+                console.error(error)
+                res.status(500).json({})
+                return
+              } else {
+                res.status(201).json({})
+                return
+              }
+            })
+          } else {
+            // Bozo is not authorized to modify this course
+            // L
+            res.status(401).json({})
+            return
+          }
+        })
+      }
+    })
   }
 })
 
@@ -802,71 +861,6 @@ app.delete('/response/:responseId', validateSession, (req, res, next) => {
 app.get('/coffee', (req, res, next) => {
   res.status(418).json({})
 })
-
-// Read all users
-// GET /users
-// with cookie SESSION_ID
-// Returns 200 OK and array of all users if successful
-// Returns 401 Unauthorized if the session doesn't exist
-// Returns 500 Internal Server Error on database failure
-app.get('/users', validateSession, (req, res) => {
-  db.all("SELECT * FROM tblUsers;", [], (err, rows) => {
-    if (err) return res.status(500).json({ message: err.message });
-    res.status(200).json(rows);
-  });
-});
-
-// Read all students
-// GET /students
-// with cookie SESSION_ID
-// Returns 200 OK and array of all student records if successful
-// Returns 401 Unauthorized if the session doesn't exist
-// Returns 500 Internal Server Error on database failure
-app.get('/students', validateSession, (req, res) => {
-  db.all("SELECT * FROM tblStudents;", [], (err, rows) => {
-    if (err) return res.status(500).json({ message: err.message });
-    res.status(200).json(rows);
-  });
-});
-
-// Read all courses
-// GET /courses
-// with cookie SESSION_ID
-// Returns 200 OK and array of all course records if successful
-// Returns 401 Unauthorized if the session doesn't exist
-// Returns 500 Internal Server Error on database failure
-app.get('/courses', validateSession, (req, res) => {
-  db.all("SELECT * FROM tblCourses;", [], (err, rows) => {
-    if (err) return res.status(500).json({ message: err.message });
-    res.status(200).json(rows);
-  });
-});
-
-// Read all groups
-// GET /groups
-// with cookie SESSION_ID
-// Returns 200 OK and array of all group records if successful
-// Returns 401 Unauthorized if the session doesn't exist
-// Returns 500 Internal Server Error on database failure
-app.get('/groups', validateSession, (req, res) => {
-  db.all("SELECT * FROM tblGroups;", [], (err, rows) => {
-    if (err) return res.status(500).json({ message: err.message });
-    res.status(200).json(rows);
-  });
-});
-
-// Read all responses
-// GET /responses
-// with cookie SESSION_ID
-// Returns 200 OK and array of all peer review responses if successful
-// Returns 401 Unauthorized if the session doesn't exist
-// Returns 500 Internal Server Error on database failure
-app.get('/responses', validateSession, (req, res) => {
-  db.all("SELECT * FROM tblResponses;", [], (err, rows) => {
-    if (err) return res.status(500).json({ message: err.message });
-    res.status(200).json(rows);
-  });
-});
 
 // Listen
 app.listen(PORT, () => {
