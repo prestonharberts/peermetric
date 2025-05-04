@@ -346,6 +346,19 @@ app.get('/user/byEmail/:email', validateSession, (req, res, next) => {
     })
 })
 
+// Read all users
+// GET /users
+// with cookie SESSION_ID
+// Returns 200 OK and array of all users if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 500 Internal Server Error on database failure
+app.get('/users', validateSession, (req, res) => {
+    db.all("SELECT UserID, Email, FirstName, LastName, MiddleInitial, Bio FROM tblUsers;", [], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.status(200).json(rows);
+    });
+});
+
 // Delete current user
 // DELETE /user
 // with body.password
@@ -625,6 +638,19 @@ function compileCourseObject(courseId) {
     return objCourse
 }
 
+// Read all courses
+// GET /courses
+// with cookie SESSION_ID
+// Returns 200 OK and array of all course records if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 500 Internal Server Error on database failure
+app.get('/courses', validateSession, (req, res) => {
+    db.all("SELECT * FROM tblCourses;", [], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.status(200).json(rows);
+    });
+});
+
 // Delete course
 // DELETE /course/{courseId}
 // with cookie SESSION_ID
@@ -680,7 +706,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                                                 console.error("DB error deleting course: \n\t" + error)
                                                 res.status(500).json({})
                                             } else {
-                                                
+
                                             }
                                         })
                                     }
@@ -785,6 +811,19 @@ app.get('/group/:groupId', validateSession, (req, res, next) => {
     }
 })
 
+// Read all groups
+// GET /groups
+// with cookie SESSION_ID
+// Returns 200 OK and array of all group records if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 500 Internal Server Error on database failure
+app.get('/groups', validateSession, (req, res) => {
+    db.all("SELECT * FROM tblGroups;", [], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.status(200).json(rows);
+    });
+});
+
 // Delete group
 // DELETE /group/{groupId}
 // with cookie SESSION_ID
@@ -815,6 +854,19 @@ app.post('/group/:groupId/student/:studentId', validateSession, (req, res, next)
     }
 })
 
+// Read all students
+// GET /students
+// with cookie SESSION_ID
+// Returns 200 OK and array of all student records if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 500 Internal Server Error on database failure
+app.get('/students', validateSession, (req, res) => {
+    db.all("SELECT * FROM tblStudents;", [], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.status(200).json(rows);
+    });
+});
+
 // Remove student from group
 // DELETE /group/{groupId}/student/{studentId}
 // with cookie SESSION_ID
@@ -828,6 +880,30 @@ app.delete('/group/:groupId/student/:studentId', validateSession, (req, res, nex
     } else {
         res.status(400).json({})
     }
+})
+
+// Get all responses tied to this group
+// GET /group/{groupId}/responses
+// with cookie SESSION_ID
+// Returns 200 OK and array of all response records if successful
+// Returns 401 Unauthorized if the session doesn't exist
+// Returns 500 Internal Server Error on database failure
+app.get('/group/:groupId/responses', validateSession, (req, res) => {
+    let strCommand = `SELECT ResponseID FROM tblResponses WHERE GroupID = ?`
+    db.all(strCommand, [req.params.groupId], function(error, result) {
+        if(error) {
+            console.error("DB error searching responses: \n\t" + error)
+            res.status(500).json({})
+            return
+        } else if(result == null) {
+            // No responses found
+            res.status(404).json({})
+            return
+        } else {
+            res.status(200).json(result)
+            return
+        }
+    })
 })
 
 // REVIEW SPEC //
