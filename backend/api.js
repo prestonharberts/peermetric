@@ -145,6 +145,17 @@ app.delete('/session', validateSession, (req, res, next) => {
     })
 })
 
+// Remove expired sessions
+// For backend use only
+function removeExpiredSessions() {
+    let strCommand = `DELETE FROM tblSessions WHERE ExpiryDate <= ?`
+    db.run(strCommand, [Date.now()], function(error) {
+        if(error) {
+            console.error("DB error deleting expired sessions: \n\t" + error)
+        }
+    })
+}
+
 // USER //
 
 // Create user
