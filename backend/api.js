@@ -59,7 +59,6 @@ function validateSession(req, res, next){
             }
         })
     }
-    // next() // db.get is an async call and next() is called up there. This line causes a race condition.
 }
 
 // Create session
@@ -99,8 +98,7 @@ app.post('/session', (req, res, next) => {
                         })
                         res.cookie('SESSION_ID', strSessionId, {
                             httpOnly: true,
-                            // expires: unixtimeExpireTime, //12 hours... the 'expires' field expects time in GMT
-                            maxAge: 12 * 60 * 60 * 1000,
+                            expires: unixtimeExpireTime, //12 hours
                             sameSite: 'Strict',
                             secure: false // Set to true with HTTPS
                         }).status(201).json({})
@@ -115,18 +113,6 @@ app.post('/session', (req, res, next) => {
         res.status(401).json({})
     }
 })
-/*
-    fetch('http://peermetric.com:1025/session', 
-    {
-        method: "POST",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include",
-        body: JSON.stringify({
-            "email": "jdoe@example.com",
-            "password": "Password123",
-        })
-    })
-*/
 
 // Delete session
 // DELETE /session
@@ -285,13 +271,6 @@ app.get('/user', validateSession, (req, res, next) => {
         }
     })
 })
-/*
-    fetch('http://peermetric.com:1025/user', {
-        method: "GET",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include"
-    })
-*/
 
 // Read user
 // GET /user/byUuid/{userId}
@@ -371,13 +350,6 @@ app.get('/user/byEmail/:email', validateSession, (req, res, next) => {
         }
     })
 })
-/*
-    fetch('http://peermetric.com:1025/user/byEmail/jdoe@example.com', {
-        method: "GET",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include"
-    })
-*/
 
 // Delete current user
 // DELETE /user
@@ -413,13 +385,6 @@ app.delete('/user', validateSession, (req, res, next) => {
         }
     })
 })
-/*
-    fetch('http://peermetric.com:1025/user', {
-        method: "DELETE",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include"
-    })
-*/
 
 app.delete('/user/byEmail/', validateSession, (req, res, next) => {
     strSqlQuery = "DELETE FROM tblUsers WHERE tblUsers.Email = ?;"
@@ -442,13 +407,6 @@ app.delete('/user/byEmail/', validateSession, (req, res, next) => {
         }
     })
 })
-/*
-    fetch('http://peermetric.com:1025/user/byEmail?jdoe@example.com', {
-        method: "DELETE",
-        headers: {"Content-Type": "Application/JSON"},
-        credentials: "include"
-    })
-*/
 // COURSE //
 
 // Create course
