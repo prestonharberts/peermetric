@@ -3,36 +3,36 @@
 const sampleUsers = {
   "johndoe@tntech.edu": {
     password: "Password123",
-    name: "John",
+    firstName: "John",
     middleInitial: "D",
     lastName: "Doe",
     phone: "(123) 456-7890",
-    discord: "johndoe#1234"
+    biography: "johndoe#1234"
   },
   "janesmith@tntech.edu": {
     password: "Password123",
-    name: "Jane",
+    firstName: "Jane",
     middleInitial: "A",
     lastName: "Smith",
     phone: "(987) 654-3210",
-    discord: "janesmith#5678"
+    biography: "janesmith#5678"
   },
   "alicebrown@tntech.edu": {
     password: "Password123",
-    name: "Alice",
+    firstName: "Alice",
     middleInitial: "E",
     lastName: "Brown",
     phone: "(444) 987-6543",
-    discord: "alicebrown#3456"
+    biography: "alicebrown#3456"
   },
   "bobjohnson@tntech.edu": {
     password: "Password123",
-    name: "Bobby",
+    firstName: "Bobby",
     middleInitial: "C",
     lastName: "Johnson",
     preferredName: "Bob",
     phone: "(555) 123-4567",
-    discord: "bobjohnson#9012"
+    biography: "bobjohnson#9012"
   }
 };
 

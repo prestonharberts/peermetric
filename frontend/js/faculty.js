@@ -15,7 +15,7 @@ function populateCourseList(sampleCourses, sampleStudents, sampleGroups, sampleR
     let totalExpected = 0; // this is here because each student may have to submit multiple reviews per partner
 
     for (const group of groupsForCourse) {
-      const groupStudents = sampleStudents.filter(s => s.CourseID === group.CourseID);
+      const groupStudents = sampleStudents.filter(s => s.GroupID === group.GroupID);
       const n = groupStudents.length;
       totalStudents += n;
 
@@ -56,7 +56,7 @@ function populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleRes
       };
     }
     const user = sampleUsers[UserEmail.toLowerCase()];
-    const fullName = user ? `${user.name} ${user.lastName}` : UserEmail;
+    const fullName = user ? `${user.firstName} ${user.lastName}` : UserEmail;
     groups[GroupID].members.push(UserEmail); // store email for response matching
   }
 
@@ -79,7 +79,7 @@ function populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleRes
     // human-readable names
     const readableNames = memberEmails.map(email => {
       const user = sampleUsers[email.toLowerCase()];
-      return user ? `<a class=pill-button href="#">${user.name} ${user.lastName}</a>` : email;
+      return user ? `<a class=pill-button href="#">${user.firstName} ${user.lastName}</a>` : email;
     }).join(' ');
 
     const tr = document.createElement('tr');
@@ -117,11 +117,15 @@ document.getElementById("formCreateCourse").addEventListener("submit", function 
   const cleaned = studentText.replace(/,/g, " "); // remove commas
   const emails = cleaned.split(/\s+/).filter(email => email); // split on whitespace
 
+  sampleGroups.push({
+    GroupID: "No group",
+    CourseID: courseID
+  });
   for (const email of emails) {
     sampleStudents.push({
       UserEmail: email,
       CourseID: courseID,
-      GroupID: ""
+      GroupID: "No group"
     });
   }
   console.log(sampleStudents)

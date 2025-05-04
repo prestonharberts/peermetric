@@ -48,7 +48,7 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
       if (sampleUsers[strEmail].preferredName) {
         localStorage.setItem('userName', sampleUsers[strEmail].preferredName)
       } else {
-        localStorage.setItem('userName', sampleUsers[strEmail].name)
+        localStorage.setItem('userName', sampleUsers[strEmail].firstName)
       }
 
       if (strLoginType == 'Student login') {
@@ -155,7 +155,7 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
     let newUser = {
       email: strEmail,
       password: strPassword,
-      name: strFirstName,
+      firstName: strFirstName,
       lastName: strLastName
     }
 
@@ -174,7 +174,7 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
     }
 
     sampleUsers[strEmail] = newUser
-    localStorage.setItem('userName', sampleUsers[strEmail].name)
+    localStorage.setItem('userName', sampleUsers[strEmail].firstName)
 
 
     // Redirect logic

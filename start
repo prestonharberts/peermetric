@@ -1,0 +1,131 @@
+#!/bin/bash
+
+# Remove old database if it exists
+rm -f ./peermetric.db
+
+# Create a new SQLite database and populate schema + sample data
+sqlite3 ./peermetric.db <<EOF
+
+-- Schema: Full normalized structure
+CREATE TABLE tblCourses (
+  CourseID TEXT NOT NULL,
+  CourseCode TEXT NOT NULL,
+  CourseName TEXT NOT NULL,
+  InstructorID TEXT NOT NULL,
+  PRIMARY KEY (CourseID)
+);
+
+CREATE TABLE tblUsers (
+  UserID TEXT NOT NULL,
+  Email TEXT NOT NULL,
+  FirstName TEXT NOT NULL,
+  LastName TEXT NOT NULL,
+  MiddleInitial TEXT,
+  PreferredName TEXT,
+  Password TEXT NOT NULL,
+  PRIMARY KEY (UserID)
+);
+
+CREATE TABLE tblContacts (
+  ContactID TEXT NOT NULL,
+  UserID TEXT NOT NULL,
+  DiscordID TEXT,
+  Biography TEXT,
+  PRIMARY KEY (ContactID),
+  FOREIGN KEY (UserID) REFERENCES tblUsers(UserID)
+);
+
+CREATE TABLE tblGroups (
+  GroupID TEXT NOT NULL,
+  CourseID TEXT NOT NULL,
+  PRIMARY KEY (GroupID),
+  FOREIGN KEY (CourseID) REFERENCES tblCourses(CourseID)
+);
+
+CREATE TABLE tblReviewSpecifications (
+  ReviewSpecID TEXT NOT NULL,
+  CourseID TEXT NOT NULL,
+  LiveDate INT NOT NULL,
+  ExpiryDate INT NOT NULL,
+  PRIMARY KEY (ReviewSpecID),
+  FOREIGN KEY (CourseID) REFERENCES tblCourses(CourseID)
+);
+
+CREATE TABLE tblStudents (
+  UserID TEXT NOT NULL,
+  CourseCode TEXT NOT NULL,
+  GroupID TEXT,
+  PRIMARY KEY (UserID, CourseCode),
+  FOREIGN KEY (UserID) REFERENCES tblUsers(UserID),
+  FOREIGN KEY (CourseCode) REFERENCES tblCourses(CourseCode),
+  FOREIGN KEY (GroupID) REFERENCES tblGroups(GroupID)
+);
+
+CREATE TABLE tblResponses (
+  ResponseID TEXT NOT NULL,
+  ReviewerID TEXT NOT NULL,
+  TargetID TEXT NOT NULL,
+  GroupID TEXT NOT NULL,
+  ReviewSpecID TEXT NOT NULL,
+  PublicFeedback TEXT,
+  PrivateFeedback TEXT,
+  PRIMARY KEY (ResponseID),
+  FOREIGN KEY (ReviewerID) REFERENCES tblUsers(UserID),
+  FOREIGN KEY (TargetID) REFERENCES tblUsers(UserID),
+  FOREIGN KEY (GroupID) REFERENCES tblGroups(GroupID),
+  FOREIGN KEY (ReviewSpecID) REFERENCES tblReviewSpecifications(ReviewSpecID)
+);
+
+CREATE TABLE tblSessions (
+  SessionID TEXT NOT NULL,
+  UserID TEXT NOT NULL,
+  ExpiryDate INT NOT NULL,
+  PRIMARY KEY (SessionID),
+  FOREIGN KEY (UserID) REFERENCES tblUsers(UserID)
+);
+
+-- Insert sample users
+INSERT INTO tblUsers (UserID, Email, FirstName, LastName, MiddleInitial, PreferredName, Password) VALUES
+('2d880362-2e3d-472e-ad28-3387fcd67334', 'johndoe@tntech.edu', 'John', 'Doe', 'D', NULL, '008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601'),
+('019553a1-7462-485f-a996-e791099a4bef', 'janesmith@tntech.edu', 'Jane', 'Smith', 'A', NULL, '008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601'),
+('5b91a79f-924b-4208-8350-d21e756cf04a', 'alicebrown@tntech.edu', 'Alice', 'Brown', 'E', NULL, '008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601'),
+('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'bobjohnson@tntech.edu', 'Bobby', 'Johnson', 'C', 'Bob', '008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601');
+
+-- Insert contacts
+INSERT INTO tblContacts (ContactID, UserID, DiscordID, Biography) VALUES
+('c1', '2d880362-2e3d-472e-ad28-3387fcd67334', 'johndoe#1234', 'N/A'),
+('c2', '019553a1-7462-485f-a996-e791099a4bef', 'janesmith#5678', 'N/A'),
+('c3', '5b91a79f-924b-4208-8350-d21e756cf04a', 'alicebrown#3456', 'N/A'),
+('c4', '2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'bobjohnson#9012', 'N/A');
+
+-- Insert courses
+INSERT INTO tblCourses (CourseID, CourseCode, CourseName, InstructorID) VALUES
+('course1', 'CSC 1310-001', 'Data Structures and Algorithms', '2d880362-2e3d-472e-ad28-3387fcd67334'),
+('course2', 'CSC 3100-001', 'Web Development', '5b91a79f-924b-4208-8350-d21e756cf04a');
+
+-- Insert groups
+INSERT INTO tblGroups (GroupID, CourseID) VALUES
+('A1', 'course1'),
+('A2', 'course2');
+
+-- Insert review specs
+INSERT INTO tblReviewSpecifications (ReviewSpecID, CourseID, LiveDate, ExpiryDate) VALUES
+('R1', 'course1', 1714348800, 1715039999),
+('R2', 'course2', 1714435200, 1715126399);
+
+-- Insert students
+INSERT INTO tblStudents (UserID, CourseCode, GroupID) VALUES
+('2d880362-2e3d-472e-ad28-3387fcd67334', 'CSC 1310-001', 'A1'),
+('019553a1-7462-485f-a996-e791099a4bef', 'CSC 1310-001', 'A1'),
+('5b91a79f-924b-4208-8350-d21e756cf04a', 'CSC 3100-001', 'A2'),
+('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'CSC 3100-001', 'A2');
+
+-- Insert responses
+INSERT INTO tblResponses (ResponseID, ReviewerID, TargetID, GroupID, ReviewSpecID, PublicFeedback, PrivateFeedback) VALUES
+('RESP1', '2d880362-2e3d-472e-ad28-3387fcd67334', '019553a1-7462-485f-a996-e791099a4bef', 'A1', 'R1', 'Jane did a great job collaborating.', 'Sometimes late to meetings.'),
+('RESP2', '5b91a79f-924b-4208-8350-d21e756cf04a', '2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'A2', 'R2', 'Bob was very helpful during coding.', 'Could communicate more.');
+
+EOF
+
+echo "Database 'peermetric.db' has been created and populated."
+(cd backend && node ./api.js)
