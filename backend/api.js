@@ -44,11 +44,17 @@ function validateSession(req, res, next){
         let strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
         db.get(strCommand, [req.cookies.SESSION_ID], function(err, result) {
             if(err) {
+                // Something went terribly wrong; use the checksum to see if a solar flare flipped some bits
                 console.error(err)
                 res.status(500).json({})
             } else if (result == null) {
+                // We don't know about the session
                 res.status(401).json({})
+            } else if(result.ExpiryDate <= Date.now()) {
+                // Oh no! The session is expired!
+                res.clearCookie('SESSION_ID').status(401).json({})
             } else {
+                // Who's a good session? You are!
                 next()
             }
         })
@@ -128,9 +134,29 @@ app.post('/session', (req, res, next) => {
 // Return 205 Reset Content if the user's sessions are successfully revoked
 // Return 401 Unauthorized otherwise
 app.delete('/session', validateSession, (req, res, next) => {
-    res.clearCookie('SESSION_ID')
-    // TODO revoke session in sqlite db
-    res.status(205).json({})
+    // Delete all sessions tied to the user
+    let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+    db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+        if(error) {
+            console.error("DB error searching sessions: \n\t" + error)
+            res.status(500).json({})
+        } else if (result == null) {
+            // No session found
+            res.status(401).json({})
+        } else {
+            // Delete all sessions tied to the user
+            strCommand = `DELETE FROM tblSessions WHERE UserID = ?`
+            db.run(strCommand, [result.UserID], function(error) {
+                if(error) {
+                    console.error("DB error deleting sessions: \n\t" + error)
+                    res.status(500).json({})
+                    return
+                }
+            })
+            res.clearCookie('SESSION_ID')
+            res.status(205).json({})
+        }
+    })
 })
 
 // USER //
