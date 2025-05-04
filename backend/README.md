@@ -9,6 +9,17 @@ This document describes the available endpoints for the Express-based API.
 **Request Body:**  
 - `email`: string  
 - `password`: string  
+
+**Sample Request:**
+```js
+fetch('http://{IP}:1025/session', {
+      method: "POST",
+      headers: {"Content-Type":"Application/JSON"},
+      credentials: "include",
+      body: JSON.stringify({email:"lol", password:"lol"})
+      }).then(response => {return response.json()}).catch(error => {console.log(error)})
+```
+
 **Responses:**  
 - `201 Created`: Session created with `SESSION_ID` cookie  
 - `401 Unauthorized`: Invalid credentials  
@@ -28,6 +39,7 @@ This document describes the available endpoints for the Express-based API.
 **Description:** Create a new user  
 **Request Body:**  
 - `email`, `passwordHash`, `firstName`, `lastName`, `title`, `phoneNumber`, `otherContacts`  
+
 **Responses:**  
 - `201 Created`  
 - `400 Bad Request`  
@@ -37,6 +49,7 @@ This document describes the available endpoints for the Express-based API.
 **Cookie:** `SESSION_ID`  
 **Request Body:**  
 - `email`, `newPasswordHash`, `firstName`, `lastName`, `title`, `phoneNumber`, `otherContacts`  
+
 **Responses:**  
 - `201 Created`  
 - `401 Unauthorized`  
@@ -62,6 +75,7 @@ This document describes the available endpoints for the Express-based API.
 **Cookie:** `SESSION_ID`  
 **Request Body:**  
 - `password`: string  
+
 **Responses:**  
 - `201 Created`  
 - `401 Unauthorized`  
@@ -76,6 +90,7 @@ This document describes the available endpoints for the Express-based API.
 **Cookie:** `SESSION_ID`  
 **Request Body:**  
 - `courseCode`, `friendlyName`  
+
 **Responses:**  
 - `201 Created` (with `courseId`)  
 - `401 Unauthorized`  
@@ -86,6 +101,7 @@ This document describes the available endpoints for the Express-based API.
 **Cookie:** `SESSION_ID`  
 **Request Body:**  
 - `courseCode`, `friendlyName`, `groupList`, `studentList`  
+
 **Responses:**  
 - `201 Created`  
 - `401 Unauthorized`  
@@ -168,6 +184,7 @@ This document describes the available endpoints for the Express-based API.
 **Cookie:** `SESSION_ID`  
 **Request Body:**  
 - `liveDate`, `expiryDate`  
+
 **Responses:**  
 - `201 Created` (with `reviewSpecId`)  
 - `401 Unauthorized`  
@@ -205,6 +222,7 @@ This document describes the available endpoints for the Express-based API.
 **Cookie:** `SESSION_ID`  
 **Request Body:**  
 - `reviewSpecId`, `reviewerId`, `targetId`, `publicFeedback`, `privateFeedback`  
+
 **Responses:**  
 - `201 Created` (with `responseId`)  
 - `401 Unauthorized`  

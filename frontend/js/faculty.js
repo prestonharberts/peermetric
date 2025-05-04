@@ -1,99 +1,188 @@
-// copilot assisted
-function populateCourseList(sampleCourses, sampleStudents, sampleGroups, sampleResponses) {
-  const courseList = document.getElementById('courseList');
-  courseList.innerHTML = ''; // clear existing rows
+async function initializeDashboard() {
+  try {
+    const [resCourses, resGroups, resStudents, resResponses, resUsers] = await Promise.all([
+      fetch('http://localhost:1025/courses', { credentials: 'include' }),
+      fetch('http://localhost:1025/groups', { credentials: 'include' }),
+      fetch('http://localhost:1025/students', { credentials: 'include' }),
+      fetch('http://localhost:1025/responses', { credentials: 'include' }),
+      fetch('http://localhost:1025/users', { credentials: 'include' })
+    ]);
 
-  // copilot helped create the logic here but I had to change how it all appears
-  for (const course of sampleCourses) {
-    const courseID = course.CourseID;
-
-    // filter groups for this course
-    const groupsForCourse = sampleGroups.filter(g => g.CourseID === courseID);
-
-    let totalStudents = 0;
-    let totalSubmitted = 0;
-    let totalExpected = 0; // this is here because each student may have to submit multiple reviews per partner
-
-    for (const group of groupsForCourse) {
-      const groupStudents = sampleStudents.filter(s => s.GroupID === group.GroupID);
-      const n = groupStudents.length;
-      totalStudents += n;
-
-      const expected = n * (n - 1); // each student evaluates others
-      totalExpected += expected;
-
-      const submitted = sampleResponses.filter(r => r.GroupID === group.GroupID).length;
-      totalSubmitted += submitted;
+    if (!resCourses.ok || !resGroups.ok || !resStudents.ok || !resResponses.ok || !resUsers.ok) {
+      throw new Error('One or more data fetches failed.');
     }
 
-    const percent = totalExpected > 0 ? Math.round((totalSubmitted / totalExpected) * 100) : 0;
+    const rawCourses = await resCourses.json();
+    const rawUsers = await resUsers.json();
+    groupList = await resGroups.json();
+    studentList = await resStudents.json();
+    responseList = await resResponses.json();
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><a class=pill-button href="#">${course.CourseSubject} ${course.CourseCode}-${course.CourseSection}</a></td>
-      <td>${course.CourseName}</td>
-      <td>${course.CourseDescription || 'No description available'}</td>
-      <td><a class=pill-button href="#">${totalStudents} student${totalStudents !== 1 ? 's' : ''}<a href="#"></td>
-      <td><a class=pill-button href="#">${totalSubmitted}/${totalExpected} submitted (${percent}%)</a></td>
-    `;
-    courseList.appendChild(tr);
+    courseMap = {};
+    for (const course of rawCourses) {
+      courseMap[course.CourseID] = {
+        courseID: course.CourseID,
+        courseCode: course.CourseCode,
+        courseName: course.CourseName
+      };
+    }
+
+    userMap = {};
+    for (const user of rawUsers) {
+      userMap[user.UserID] = {
+        userID: user.UserID,
+        firstName: user.FirstName,
+        lastName: user.LastName
+      };
+    }
+
+    renderCourseTable();
+    renderGroupTable();
+
+  } catch (error) {
+    console.error('Error loading dashboard:', error);
+    Swal.fire({
+      title: 'Error Loading Data',
+      text: 'Unable to load course data. Please try again later.',
+      icon: 'error'
+    });
   }
 }
 
-// copilot assisted
-function populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleResponses) {
-  const groupList = document.getElementById('groupList');
-  groupList.innerHTML = ''; // clear existing rows
+function renderCourseTable() {
+  const tableBody = document.getElementById('courseList');
+  tableBody.innerHTML = '';
 
-  // group students by GroupID
-  const groups = {};
+  for (const course of Object.values(courseMap)) {
+    const courseID = course.courseID;
+    const relatedGroups = groupList.filter(g => g.CourseID === courseID);
 
-  // copilot helped create the logic here but I had to change how it all appears
-  for (const student of sampleStudents) {
-    const { GroupID, CourseID, UserEmail } = student; // courseID actually equals CourseID like "CSC1310-001"
-    if (!groups[GroupID]) {
-      groups[GroupID] = {
-        courseID: CourseID,
+    let totalStudents = 0;
+    let totalReviewsSubmitted = 0;
+    let totalReviewsExpected = 0;
+
+    for (const group of relatedGroups) {
+      const studentsInGroup = studentList.filter(s => s.GroupID === group.GroupID);
+      const groupSize = studentsInGroup.length;
+
+      totalStudents += groupSize;
+      totalReviewsExpected += groupSize * (groupSize - 1);
+      totalReviewsSubmitted += responseList.filter(r => r.GroupID === group.GroupID).length;
+    }
+
+    const submissionRate = totalReviewsExpected > 0
+      ? Math.round((totalReviewsSubmitted / totalReviewsExpected) * 100)
+      : 0;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><a class="pill-button" href="#">${course.courseCode} - ${course.courseName}</a></td>
+      <td><a class="pill-button" href="#">${totalStudents} student${totalStudents !== 1 ? 's' : ''}</a></td>
+      <td><a class="pill-button" href="#">${totalReviewsSubmitted}/${totalReviewsExpected} submitted (${submissionRate}%)</a></td>
+    `;
+    tableBody.appendChild(row);
+  }
+}
+
+function renderGroupTable() {
+  const tableBody = document.getElementById('groupList');
+  tableBody.innerHTML = '';
+
+  const groupDataMap = {};
+
+  for (const student of studentList) {
+    const groupID = student.GroupID;
+    const courseID = student.CourseID;
+    const userID = student.UserID;
+
+    if (!groupDataMap[groupID]) {
+      groupDataMap[groupID] = {
+        courseID,
         members: []
       };
     }
-    const user = sampleUsers[UserEmail.toLowerCase()];
-    const fullName = user ? `${user.name} ${user.lastName}` : UserEmail;
-    groups[GroupID].members.push(UserEmail); // store email for response matching
+
+    groupDataMap[groupID].members.push(userID);
   }
 
-  // build table rows
-  for (const [groupID, groupData] of Object.entries(groups)) {
-    const course = sampleCourses.find(c => c.CourseID === groupData.courseID);
-    const courseLabel = course
-      ? `${course.CourseSubject} ${course.CourseCode}-${course.CourseSection}`
-      : groupData.courseID;
-
-    const memberEmails = groupData.members;
-    const studentCount = memberEmails.length;
-    const expectedCount = studentCount * (studentCount - 1);
-
-    const submittedCount = sampleResponses.filter(
-      r => r.GroupID === groupID
-    ).length;
-
-    const percent = expectedCount > 0
-      ? Math.round((submittedCount / expectedCount) * 100)
+  for (const [groupID, groupData] of Object.entries(groupDataMap)) {
+    const memberIDs = groupData.members;
+    const studentCount = memberIDs.length;
+    const expectedReviews = studentCount * (studentCount - 1);
+    const actualReviews = responseList.filter(r => r.GroupID === groupID).length;
+    const completionRate = expectedReviews > 0
+      ? Math.round((actualReviews / expectedReviews) * 100)
       : 0;
 
-    // human-readable names
-    const readableNames = memberEmails.map(email => {
-      const user = sampleUsers[email.toLowerCase()];
-      return user ? `<a class=pill-button href="#">${user.name} ${user.lastName}</a>` : email;
+    const courseInfo = courseMap[groupData.courseID];
+    const courseLabel = courseInfo
+      ? `${courseInfo.courseCode} - ${courseInfo.courseName}`
+      : groupData.courseID;
+
+    const readableNames = memberIDs.map(id => {
+      const user = userMap[id];
+      return user
+        ? `<a class="pill-button" href="#">${user.firstName} ${user.lastName}</a>`
+        : id;
     }).join(' ');
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><a class=pill-button href="#">${courseLabel}</a></td>
-      <td><a class=pill-button href="#">${groupID}</a></td>
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><a class="pill-button" href="#">${courseLabel}</a></td>
+      <td><a class="pill-button" href="#">${groupID}</a></td>
       <td>${readableNames}</td>
-      <td><a class=pill-button href="#">${submittedCount}/${expectedCount} submitted (${percent}%)</a></td>
+      <td><a class="pill-button" href="#">${actualReviews}/${expectedReviews} submitted (${completionRate}%)</a></td>
     `;
-    groupList.appendChild(tr);
+    tableBody.appendChild(row);
   }
 }
+
+document.getElementById("formCreateCourse").addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  const courseID = document.getElementById("CourseID").value.trim();
+  const courseName = document.getElementById("CourseName").value.trim();
+  const studentText = document.getElementById("courseStudents").value.trim();
+
+  if (!courseID || !courseName) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  courseMap[courseID] = {
+    courseID: courseID,
+    courseCode: courseID,
+    courseName: courseName
+  };
+
+  const emailList = studentText.replace(/,/g, " ").split(/\s+/).filter(Boolean);
+
+  groupList.push({
+    GroupID: "No group",
+    CourseID: courseID
+  });
+
+  for (const email of emailList) {
+    studentList.push({
+      UserEmail: email,
+      CourseID: courseID,
+      GroupID: "No group"
+    });
+  }
+
+  this.reset();
+  renderCourseTable();
+});
+
+document.getElementById('txtSearchGroups').addEventListener('input', function () {
+  const searchQuery = this.value.toLowerCase();
+  const rows = document.querySelectorAll('#taskList tr');
+
+  for (const row of rows) {
+    const values = Array.from(row.children).map(cell => cell.textContent.toLowerCase());
+    const isVisible = values.some(text => text.includes(searchQuery));
+    row.style.display = isVisible ? '' : 'none';
+  }
+});
+
+initializeDashboard();
