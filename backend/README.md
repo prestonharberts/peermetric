@@ -12,7 +12,7 @@ This document describes the available endpoints for the Express-based API.
 
 **Sample Request:**
 ```js
-fetch('http://{IP}:{PORT}/session', {
+fetch('http://{IP}:1025/session', {
       method: "POST",
       headers: {"Content-Type":"Application/JSON"},
       credentials: "include",

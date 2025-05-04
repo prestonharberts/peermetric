@@ -7,4 +7,3 @@ DROP TABLE tblSessions;
 DROP TABLE tblUsers;
 DROP TABLE tblReviewSpecifications;
 DROP TABLE tblStudents;
-DROP TABLE tblContacts;
