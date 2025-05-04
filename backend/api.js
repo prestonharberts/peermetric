@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser')
 const sqlite3 = require('sqlite3').verbose()
 
 const PORT = 1025
+const regexUUID = /[0-9A-Za-z]{8}-[0-9A-Za-z]{4}-4[0-9A-Za-z]{3}-[89ABab][0-9A-Za-z]{3}-[0-9A-Za-z]{12}/
+
 const app = express()
 app.use(cors(
     {
@@ -428,27 +430,91 @@ app.delete('/user/byEmail/', validateSession, (req, res, next) => {
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
 app.post('/course', validateSession, (req, res, next) => {
-    // TODO add actual validation and course creation
-    if(req.body.courseCode && req.body.friendlyName) {
-        res.status(201).json({courseId: "courseId"})
-    } else {
+    // Validate parameters
+    if(req.body.courseCode == null || req.body.friendlyName == null) {
         res.status(400).json({})
+        return
+    } else {
+        // Get the user ID from the session
+        let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+        db.get(strCommand, [req.cookies.SESSION_ID], function(err, result) {
+            if(err) {
+                console.error(err)
+                res.status(500).json({})
+            } else {
+                // Toss the info in the db
+                let strCommand = `INSERT INTO tblCourses (CourseID, CourseCode, FriendlyName, OwnerID)`
+                let strCourseId = uuidv4()
+                db.run(strCommand, [strCourseId, req.body.courseCode, req.body.friendlyName, result.UserID], function(error) {
+                    if(error) {
+                        console.error(error)
+                        res.status(500).json({})
+                    } else {
+                        res.status(201).json({courseId: strCourseId})
+                    }
+                })
+            }
+        })
     }
 })
 
 // Update course
 // PUT /course/{courseId}
-// with body.courseCode(e.g. CSC 3100-001), body.friendlyName(e.g. Web Dev), body.groupList, body.studentList
+// with body.courseCode(e.g. CSC 3100-001), body.friendlyName(e.g. Web Dev)
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
+// Returns 404 Not Found if the course doesn't exist
 // Returns 400 Bad Request otherwise
 app.put('/course/:courseId', validateSession, (req, res, next) => {
-    // TODO add permission validation, actual validation, and course update
-    if(req.params.courseId && req.body.courseCode && req.body.friendlyName && req.body.groupList && req.body.studentList) {
-        res.status(201).json({})
-    } else {
+    // Validate parameters
+    if(req.body.courseCode == null || req.body.friendlyName == null || !regexUUID.test(req.params.courseId)) {
         res.status(400).json({})
+        return
+    } else {
+        // Get the user ID from the session
+        let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+        db.get(strCommand, [req.cookies.SESSION_ID], function(err, result) {
+            if(err) {
+                console.error(err)
+                res.status(500).json({})
+                return
+            } else {
+                const strUserId = result.UserID
+                // Check if the user is the owner of the course
+                let strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
+                db.get(strCommand, [req.params.courseId], function(error, result) {
+                    if(error) {
+                        console.error("DB error searching courses: \n\t" + error)
+                        res.status(500).json({})
+                        return
+                    } else if (result == null) {
+                        // Course not found
+                        // Womp womp
+                        res.status(404).json({})
+                        return
+                    } else if(result.OwnerID != strUserId) {
+                        // Toss the info in the db
+                        let strCommand = `UPDATE tblCourses SET CourseCode = ?, CourseName = ? WHERE CourseID = ?`
+                        db.run(strCommand, [req.body.courseCode, req.body.friendlyName, req.params.courseId], function(error) {
+                            if(error) {
+                                console.error(error)
+                                res.status(500).json({})
+                                return
+                            } else {
+                                res.status(201).json({})
+                                return
+                            }
+                        })
+                    } else {
+                        // Bozo is not authorized to modify this course
+                        // L
+                        res.status(401).json({})
+                        return
+                    }
+                })
+            }
+        })
     }
 })
 
