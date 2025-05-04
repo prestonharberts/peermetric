@@ -15,19 +15,8 @@ CREATE TABLE `tblUsers` (
   `LastName` text NOT NULL,
   `MiddleInitial` text,
   `Password` text NOT NULL,
+  `Bio` text,
   PRIMARY KEY (`UserID`)
-);
-
-CREATE TABLE `tblContacts` (
-  `ContactID` text NOT NULL,
-  `UserID` text NOT NULL,
-  `DiscordID` text,
-  `PhoneNumber` text,
-  `FacebookUser` text,
-  `InstagramUser` text,
-  `XUser` text,
-  PRIMARY KEY (`ContactID`),
-  FOREIGN KEY (`UserID`) REFERENCES `tblUsers` (`UserID`)
 );
 
 CREATE TABLE `tblGroups` (
