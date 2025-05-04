@@ -53,6 +53,7 @@ function validateSession(req, res, next){
             }
         })
     }
+    // next() // db.get is an async call and next() is called up there. This line causes a race condition.
 }
 
 // Create session
@@ -92,7 +93,8 @@ app.post('/session', (req, res, next) => {
                         })
                         res.cookie('SESSION_ID', strSessionId, {
                             httpOnly: true,
-                            expires: unixtimeExpireTime, //12 hours
+                            // expires: unixtimeExpireTime, //12 hours... the 'expires' field expects time in GMT
+                            maxAge: 12 * 60 * 60 * 1000,
                             sameSite: 'Strict',
                             secure: false // Set to true with HTTPS
                         }).status(201).json({})
@@ -107,6 +109,18 @@ app.post('/session', (req, res, next) => {
         res.status(401).json({})
     }
 })
+/*
+    fetch('http://peermetric.com:1025/session', 
+    {
+        method: "POST",
+        headers: {"Content-Type": "Application/JSON"},
+        credentials: "include",
+        body: JSON.stringify({
+            "email": "jdoe@example.com",
+            "password": "Password123",
+        })
+    })
+*/
 
 // Delete session
 // DELETE /session
@@ -123,17 +137,70 @@ app.delete('/session', validateSession, (req, res, next) => {
 
 // Create user
 // POST /user
-// with body.email body.passwordHash body.firstName body.lastName body.title body.phoneNumber body.otherContacts
+// with body.email body.password body.firstName body.lastName body.title body.phoneNumber body.otherContacts
 // Returns 201 Created if successful
 // Returns 400 Bad Request otherwise
 app.post('/user', (req, res, next) => {
     // TODO add actual validation and user creation
-    if(req.body.email && req.body.passwordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.phoneNumber && req.body.otherContacts) {
-        res.status(201).json({})
+    // (eg. Don't make account twice)
+
+    // If there are valid fields, make account
+    if(req.body.email && req.body.bio && req.body.password && req.body.firstName && req.body.lastName && req.body.middleInitial) {
+        // Hash password to store in db
+        const intSaltRounds = 10
+        bcrypt.hash(req.body.password, intSaltRounds, (err, hash) => {
+            if (err)
+            {
+                console.error(err.message)
+                return res.status(500).json({
+                    "message": err.message
+                })
+            }
+            else
+            {
+                const strNewID = uuidv4()
+                const strSqlQuery = "INSERT INTO tblUsers (UserID, Email, FirstName, LastName, MiddleInitial, Password, Bio) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                const arrParams = [strNewID, req.body.email, req.body.firstName, req.body.lastName, req.body.middleInitial, hash, req.body.bio]
+                db.run(strSqlQuery, arrParams, (err) => {
+                    if (err)
+                    {
+                        console.error(err.message)
+                        return res.status(500).json({
+                            message: err.message
+                        })
+                    }
+                    else
+                    {
+                        return res.status(201).json({
+                            "message": "User Created",
+                            "userID": strNewID
+                        })
+                    }
+                })
+            }
+        })
     } else {
-        res.status(400).json({})
+        return res.status(400).json({"message": "Invalid Argument"})
     }
 })
+
+/*
+    // All fields are required right now
+    fetch('http://peermetric.com:1025/user', 
+    {
+        method: "POST",
+        headers: {"Content-Type": "Application/JSON"},
+        credentials: "include",
+        body: JSON.stringify({
+            "email": "jdoe@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "middleInitial": "R",
+            "password": "Password123",
+            "bio": "I am a user with the discord tag user#8573"
+        })
+    })
+*/
 
 // Update user
 // PUT /user
@@ -144,7 +211,7 @@ app.post('/user', (req, res, next) => {
 // Returns 400 Bad Request otherwise
 app.put('/user', validateSession, (req, res, next) => {
     // TODO add actual validation and user update
-    if(req.body.email && req.body.newPasswordHash && req.body.firstName && req.body.lastName && req.body.title && req.body.phoneNumber && req.body.otherContacts) {
+    if(req.body.email && req.body.newPassword && req.body.firstName && req.body.lastName && req.body.title && req.body.phoneNumber && req.body.otherContacts) {
         res.status(201).json({})
     } else {
         res.status(400).json({})
@@ -155,29 +222,50 @@ app.put('/user', validateSession, (req, res, next) => {
 // GET /user
 // with cookie SESSION_ID
 // Returns 200 OK and user object if successful
-// Returns 401 Unauthorized if the session doesn't exist
+// Returns 401 Unauthorized if the session doesn't exist... see validateSession()
 // User object:
 // {
 //   userId: string,
 //   email: string,
 //   firstName: string,
 //   lastName: string,
-//   title: string,
-//   phoneNumber: string,
-//   otherContacts: string
+//   middleInitial: string
+//   bio: string
 // }
 app.get('/user', validateSession, (req, res, next) => {
-    // TODO get user from session
-    res.status(200).json({
-        userId: "userId",
-        email: "lol@aol.com",
-        firstName: "John",
-        lastName: "Doe",
-        title: "Mr.",
-        phoneNumber: "123-456-7890",
-        otherContacts: "discord: JohnDoe#1234"
+    strSessionID = req.cookies.SESSION_ID
+    
+    strSqlQuery = "SELECT * FROM tblUsers LEFT JOIN tblSessions ON tblUsers.UserID = tblSessions.UserID WHERE tblSessions.SessionID = ?;"
+    strSqlParam = strSessionID
+
+    db.get(strSqlQuery, strSqlParam, (error, result) => {
+        if (error)
+        {
+            console.error(error.message)
+            return res.status(400).json({
+                message: error.message
+            })
+        }
+        else
+        {
+            return res.status(200).json({
+                userID: result.UserID,
+                Email: result.Email,
+                firstName: result.FirstName,
+                lastName: result.LastName,
+                middleInitial: result.MiddleInitial,
+                bio: result.Bio
+            })
+        }
     })
 })
+/*
+    fetch('http://peermetric.com:1025/user', {
+        method: "GET",
+        headers: {"Content-Type": "Application/JSON"},
+        credentials: "include"
+    })
+*/
 
 // Read user
 // GET /user/byUuid/{userId}
@@ -190,20 +278,22 @@ app.get('/user', validateSession, (req, res, next) => {
 //   email: string,
 //   firstName: string,
 //   lastName: string,
-//   title: string,
-//   phoneNumber: string,
-//   otherContacts: string
+//   middleInitial: string
+//   bio: string
 // }
 app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
     // TODO validate userId and get user
-    res.status(200).json({
-        userId: "userId",
-        email: "abc@aol.com",
-        firstName: "Jill",
-        lastName: "Doe",
-        title: "Ms.",
-        phoneNumber: "123-456-0987",
-        otherContacts: "discord: JillDoe#1234"
+    // res.status(200).json({
+    //     userId: "userId",
+    //     email: "abc@aol.com",
+    //     firstName: "Jill",
+    //     lastName: "Doe",
+    //     title: "Ms.",
+    //     phoneNumber: "123-456-0987",
+    //     otherContacts: "discord: JillDoe#1234"
+    // })
+    return res.status(501).json({
+        message: "Not yet built. Let me know when you need this!"
     })
 })
 
@@ -218,39 +308,121 @@ app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
 //   email: string,
 //   firstName: string,
 //   lastName: string,
-//   title: string,
-//   phoneNumber: string,
-//   otherContacts: string
+//   middleInitial: string
+//   bio: string
 // }
 app.get('/user/byEmail/:email', validateSession, (req, res, next) => {
-    // TODO validate email and get user
-    res.status(200).json({
-        userId: "userId",
-        email: "abc@aol.com",
-        firstName: "Jill",
-        lastName: "Doe",
-        title: "Ms.",
-        phoneNumber: "123-456-0987",
-        otherContacts: "discord: JillDoe#1234"
+
+    strSqlQuery = "SELECT * FROM tblUsers WHERE Email = ?;"
+    strSqlParam = req.params.email
+    db.get(strSqlQuery, strSqlParam, (error, result) => {
+        if (error)
+        {
+            console.error(error.message)
+            return res.status(400).json({
+                message: error.message
+            })
+        }
+        else
+        {
+            if (!result)
+            {
+                return res.status(400).json({
+                    message: `User ${req.params.email} not found`
+                })
+            }
+            else
+            {
+                return res.status(200).json({
+                    userID: result.UserID,
+                    Email: result.Email,
+                    firstName: result.FirstName,
+                    lastName: result.LastName,
+                    middleInitial: result.MiddleInitial,
+                    bio: result.Bio
+                })
+            }
+        }
     })
 })
+/*
+    fetch('http://peermetric.com:1025/user/byEmail/jdoe@example.com', {
+        method: "GET",
+        headers: {"Content-Type": "Application/JSON"},
+        credentials: "include"
+    })
+*/
 
-// Delete user
+// Delete current user
 // DELETE /user
 // with body.password
 // with cookie SESSION_ID
 // Returns 201 Created if successfully deleted
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.delete('/user', validateSession, (req, res, next) => {
-    // TODO add actual validation and delete user
-    if(req.body.password) {
-        res.status(201).json({})
-    } else {
-        res.status(400).json({})
-    }
-})
 
+// AS OF NOW, THIS ROUTE BREAKS SQL THEORY!!
+app.delete('/user', validateSession, (req, res, next) => {
+
+    strSessionID = req.cookies.SESSION_ID
+    // I honestly didn't think this query would even work lol
+    strSqlQuery = "DELETE FROM tblUsers WHERE tblUsers.UserID = (SELECT tblUsers.UserID from tblUsers LEFT JOIN tblSessions ON tblUsers.UserID = tblSessions.UserID WHERE tblSessions.SessionID = ?);"
+    strSqlParam = strSessionID
+
+    db.run(strSqlQuery, strSqlParam, (error) => {
+        if (error)
+        {
+            console.error(error.message)
+            return res.status(400).json({
+                message: error.message
+            })
+        }
+        else
+        {
+            // Delete sessionID 
+            res.clearCookie('SESSION_ID')
+            return res.status(205).json({
+                message: "User deleted!"
+            })
+        }
+    })
+})
+/*
+    fetch('http://peermetric.com:1025/user', {
+        method: "DELETE",
+        headers: {"Content-Type": "Application/JSON"},
+        credentials: "include"
+    })
+*/
+
+app.delete('/user/byEmail/', validateSession, (req, res, next) => {
+    strSqlQuery = "DELETE FROM tblUsers WHERE tblUsers.Email = ?;"
+    strSqlParam = req.params.email
+
+    db.run(strSqlQuery, strSqlParam, (error) => {
+        if (error)
+        {
+            console.error(error.message)
+            return res.status(400).json({
+                message: error.message
+            })
+        }
+        else
+        {
+            res.clearCookie('SESSION_ID')
+            return res.status(205).json({
+                message: "User deleted!"
+            })
+        }
+    })
+})
+/*
+    fetch('http://peermetric.com:1025/user/byEmail?jdoe@example.com', {
+        method: "DELETE",
+        headers: {"Content-Type": "Application/JSON"},
+        credentials: "include"
+    })
+*/
 // COURSE //
 
 // Create course
