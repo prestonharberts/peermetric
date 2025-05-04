@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Remove old database if it exists
-rm -f ./peermetric.db
+rm -f ./peermetric-0.1.db
 
 # Create a new SQLite database and populate schema + sample data
-sqlite3 ./peermetric.db <<EOF
+sqlite3 ./peermetric-0.1.db <<'EOF'
 
 -- Schema: Full normalized structure
 CREATE TABLE tblCourses (
@@ -53,11 +53,11 @@ CREATE TABLE tblReviewSpecifications (
 
 CREATE TABLE tblStudents (
   UserID TEXT NOT NULL,
-  CourseCode TEXT NOT NULL,
+  CourseID TEXT NOT NULL,
   GroupID TEXT,
-  PRIMARY KEY (UserID, CourseCode),
+  PRIMARY KEY (UserID, CourseID),
   FOREIGN KEY (UserID) REFERENCES tblUsers(UserID),
-  FOREIGN KEY (CourseCode) REFERENCES tblCourses(CourseCode),
+  FOREIGN KEY (CourseID) REFERENCES tblCourses(CourseID),
   FOREIGN KEY (GroupID) REFERENCES tblGroups(GroupID)
 );
 
@@ -86,10 +86,10 @@ CREATE TABLE tblSessions (
 
 -- Insert sample users
 INSERT INTO tblUsers (UserID, Email, FirstName, LastName, MiddleInitial, PreferredName, Password) VALUES
-('2d880362-2e3d-472e-ad28-3387fcd67334', 'johndoe@tntech.edu', 'John', 'Doe', 'D', NULL, '008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601'),
-('019553a1-7462-485f-a996-e791099a4bef', 'janesmith@tntech.edu', 'Jane', 'Smith', 'A', NULL, '008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601'),
-('5b91a79f-924b-4208-8350-d21e756cf04a', 'alicebrown@tntech.edu', 'Alice', 'Brown', 'E', NULL, '008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601'),
-('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'bobjohnson@tntech.edu', 'Bobby', 'Johnson', 'C', 'Bob', '008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601');
+('2d880362-2e3d-472e-ad28-3387fcd67334', 'johndoe@tntech.edu', 'John', 'Doe', 'D', NULL, '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta'),
+('019553a1-7462-485f-a996-e791099a4bef', 'janesmith@tntech.edu', 'Jane', 'Smith', 'A', NULL, '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta'),
+('5b91a79f-924b-4208-8350-d21e756cf04a', 'alicebrown@tntech.edu', 'Alice', 'Brown', 'E', NULL, '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta'),
+('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'bobjohnson@tntech.edu', 'Bobby', 'Johnson', 'C', 'Bob', '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta');
 
 -- Insert contacts
 INSERT INTO tblContacts (ContactID, UserID, DiscordID, Biography) VALUES
@@ -114,11 +114,11 @@ INSERT INTO tblReviewSpecifications (ReviewSpecID, CourseID, LiveDate, ExpiryDat
 ('R2', 'course2', 1714435200, 1715126399);
 
 -- Insert students
-INSERT INTO tblStudents (UserID, CourseCode, GroupID) VALUES
-('2d880362-2e3d-472e-ad28-3387fcd67334', 'CSC 1310-001', 'A1'),
-('019553a1-7462-485f-a996-e791099a4bef', 'CSC 1310-001', 'A1'),
-('5b91a79f-924b-4208-8350-d21e756cf04a', 'CSC 3100-001', 'A2'),
-('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'CSC 3100-001', 'A2');
+INSERT INTO tblStudents (UserID, CourseID, GroupID) VALUES
+('2d880362-2e3d-472e-ad28-3387fcd67334', 'course1', 'A1'),
+('019553a1-7462-485f-a996-e791099a4bef', 'course1', 'A1'),
+('5b91a79f-924b-4208-8350-d21e756cf04a', 'course2', 'A2'),
+('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'course2', 'A2');
 
 -- Insert responses
 INSERT INTO tblResponses (ResponseID, ReviewerID, TargetID, GroupID, ReviewSpecID, PublicFeedback, PrivateFeedback) VALUES
@@ -127,5 +127,5 @@ INSERT INTO tblResponses (ResponseID, ReviewerID, TargetID, GroupID, ReviewSpecI
 
 EOF
 
-echo "Database 'peermetric.db' has been created and populated."
+echo "Database 'peermetric-0.1.db' has been created and populated."
 (cd backend && node ./api.js)

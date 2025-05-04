@@ -44,26 +44,56 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
     })
   }
   else {
-    if (sampleUsers[strEmail] && sampleUsers[strEmail].password === strPassword) {
-      if (sampleUsers[strEmail].preferredName) {
-        localStorage.setItem('userName', sampleUsers[strEmail].preferredName)
-      } else {
-        localStorage.setItem('userName', sampleUsers[strEmail].firstName)
-      }
-
-      if (strLoginType == 'Student login') {
-        window.location.href = 'student.html'
-      } else if (strLoginType == 'Faculty login') {
-        window.location.href = 'faculty.html'
-      }
-    } else {
-      Swal.fire({
-        title: 'Error!',
-        html: '<p>Incorrect email or password</p>',
-        icon: 'error',
-        confirmButtonText: 'Close'
+    fetch('http://localhost:1025/session', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: strEmail,
+        password: strPassword
       })
-    }
+    })
+      .then(response => {
+        if (response.status === 201) {
+          // Session created; now fetch user info
+          return fetch('http://localhost:1025/user', {
+            method: 'GET',
+            credentials: 'include'
+          });
+        } else if (response.status === 401) {
+          throw new Error('Unauthorized');
+        } else {
+          throw new Error('Unexpected server response');
+        }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to load user info');
+        return response.json();
+      })
+      .then(user => {
+        // Use preferred name if available, otherwise fall back to first name
+        const displayName = user.preferredName || user.firstName;
+        localStorage.setItem('userName', displayName);
+        localStorage.setItem('userEmail', user.Email);
+        localStorage.setItem('userId', user.userID);
+
+        if (strLoginType === 'Student login') {
+          window.location.href = 'student.html';
+        } else if (strLoginType === 'Faculty login') {
+          window.location.href = 'faculty.html';
+        }
+      })
+      .catch(error => {
+        console.error('Login error:', error);
+        Swal.fire({
+          title: 'Login Failed',
+          html: '<p>Incorrect email or password</p>',
+          icon: 'error',
+          confirmButtonText: 'Close'
+        });
+      });
   }
 })
 
@@ -173,8 +203,8 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
       newUser.discord = strDiscord
     }
 
-    sampleUsers[strEmail] = newUser
-    localStorage.setItem('userName', sampleUsers[strEmail].firstName)
+    users[strEmail] = newUser
+    localStorage.setItem('userName', users[strEmail].firstName)
 
 
     // Redirect logic

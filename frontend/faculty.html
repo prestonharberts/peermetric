@@ -26,7 +26,7 @@
     <!-- PAGE HEADER -->
     <div class="row align-items-center mb-3 text-center">
       <div class="col text-start">
-        <h5 id="userNameHeader" class="mb-0">Hello, </h5>
+        <h5 id="userNameHeader" class="mb-0"></h5>
       </div>
       <div class="col-auto mx-auto">
         <h3 class="mb-0">
@@ -172,28 +172,18 @@
               <div class="row g-2 mb-2">
                 <div class="col-md-4">
                   <!-- input for course code -->
-                  <input id="courseID" type="text" class="form-control" placeholder="Enter course ID" aria-label="Course code" />
+                  <input id="CourseID" type="text" class="form-control" placeholder="Enter course ID" aria-label="Course code" />
                 </div>
                 <div class="col-md-8">
                   <!-- input for course name -->
-                  <input id="courseName" type="text" class="form-control" placeholder="Enter course name" aria-label="Course name" />
+                  <input id="CourseName" type="text" class="form-control" placeholder="Enter course name" aria-label="Course name" />
                 </div>
               </div>
               <div class="row g-2 mb-2">
                 <!-- input for student list -->
                 <textarea id="courseStudents" name="courseStudents" rows="4" class="form-control" placeholder="Enter student names" aria-label="Student list"></textarea>
-                <div class="col-md-10">
-                  <!-- input for semester -->
-                  <select id="courseSemester" class="form-control" aria-label="Select semester">
-                    <option value="" selected hidden>Select semester</option>
-                    <option value="spring2025">Spring 2025</option>
-                    <option value="summer2025">Summer 2025</option>
-                    <option value="fall2025">Fall 2025</option>
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <!-- submit button -->
-                  <button type="submit" id="btnCreateCourse" class="btn btn-success w-100">Create Course</button>
+                <div class="d-flex">
+                  <button type="submit" id="btnCreateCourse" class="btn btn-success ms-auto">Create Course</button>
                 </div>
               </div>
             </form>
@@ -258,18 +248,14 @@
   <script src="js/lib/bootstrap.bundle.min.js"></script>
   <script src="js/lib/sweetalert2.all.min.js"></script>
   <script src="js/faculty.js"></script>
-  <script src="js/sample-data.js"></script>
   <script>
     const userName = localStorage.getItem('userName')
+    const userNameHeader = document.getElementById('userNameHeader')
     if (userName) {
-      document.getElementById('userNameHeader').textContent += userName
+      userNameHeader.textContent += `Hello, ${userName}`
     } else {
-      document.getElementById('userNameHeader').textContent = 'No name found'
+      userNameHeader.textContent = 'No name found'
     }
-
-    populateCourseList(sampleCourses, sampleStudents, sampleGroups, sampleResponses)
-    populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleResponses);
-
   </script>
 </body>
 

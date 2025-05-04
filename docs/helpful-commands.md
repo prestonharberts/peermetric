@@ -17,3 +17,21 @@ git branch -d <branch-name>
 
 ## Delete that local branch on remote too:
 git push -d --set-upstream origin <branch-name>
+
+## Pull from remote for all local branches:
+for branch in $(git branch | sed 's/^\*//'); do
+    git checkout "$branch"
+    git pull
+done
+
+## Create local branches from all remote branches:
+git fetch --all
+for remote in $(git branch -r | grep -v 'HEAD'); do
+    branch=${remote#origin/}
+    if git show-ref --verify --quiet refs/heads/"$branch"; then
+        git checkout "$branch"
+        git pull
+    else
+        git checkout -b "$branch" "$remote"
+    fi
+done
