@@ -632,9 +632,66 @@ function compileCourseObject(courseId) {
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
 app.delete('/course/:courseId', validateSession, (req, res, next) => {
-    // TODO add permission validation, actual validation, and delete course
-    if(req.params.courseId) {
+    // validate courseId
+    if(regexUUID.test(req.params.courseId)) {
         res.status(201).json({})
+        // Validate permission
+        let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+        db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+            if(error) {
+                console.error("DB error searching sessions: \n\t" + error)
+                res.status(500).json({})
+            } else {
+                const strUserId = result.UserID
+                // You know the rules, and so do I
+                // Authentication's what I'm thinking of
+                // You wouldn't get this from any API
+                let strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
+                db.get(strCommand, [req.params.courseId], function(error, result) {
+                    if(error) {
+                        console.error("DB error searching course: \n\t" + error)
+                        res.status(500).json({})
+                    } else if(result == null) {
+                        // Course not found
+                        res.status(404).json({})
+                    } else if(result.OwnerID != strUserId) {
+                        // Unauthorized
+                        res.status(401).json({})
+                    } else {
+                        // Delete the course
+                        let strCommand = `DELETE FROM tblCourses WHERE CourseID = ?`
+                        db.run(strCommand, [req.params.courseId], function(error) {
+                            if(error) {
+                                console.error("DB error deleting course: \n\t" + error)
+                                res.status(500).json({})
+                                return
+                            } else {
+                                // Delete all students' relationships to the course
+                                let strCommand = `DELETE FROM tblStudents WHERE CourseID = ?`
+                                db.run(strCommand, [req.params.courseId], function(error) {
+                                    if(error) {
+                                        console.error("DB error deleting course: \n\t" + error)
+                                        res.status(500).json({})
+                                    } else {
+                                        // Delete all groups related to the course
+                                        let strCommand = `DELETE FROM tblGroups WHERE CourseID = ?`
+                                        db.run(strCommand, [req.params.courseId], function(error) {
+                                            if(error) {
+                                                console.error("DB error deleting course: \n\t" + error)
+                                                res.status(500).json({})
+                                            } else {
+                                                
+                                            }
+                                        })
+                                    }
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        })
+        // TODO delete course and all references
     } else {
         res.status(400).json({})
     }
