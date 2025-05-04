@@ -45,16 +45,23 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
   }
   else {
     fetch('http://localhost:1025/session', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email: strEmail,
-        password: strPassword
-      })
+      method: 'DELETE',
+      credentials: 'include'
     })
+      .then(() => {
+        // Now create a new session
+        return fetch('http://localhost:1025/session', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: strEmail,
+            password: strPassword
+          })
+        });
+      })
       .then(response => {
         if (response.status === 201) {
           // Session created; now fetch user info
