@@ -44,24 +44,18 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
     })
   }
   else {
-    fetch('http://localhost:1025/session', {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-      .then(() => {
-        // Now create a new session
-        return fetch('http://localhost:1025/session', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            email: strEmail,
-            password: strPassword
-          })
-        });
+    // Now create a new session
+    return fetch('http://localhost:1025/session', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: strEmail,
+        password: strPassword
       })
+    })
       .then(response => {
         if (response.status === 201) {
           // Session created; now fetch user info
@@ -81,7 +75,9 @@ document.querySelector('#btnLogin').addEventListener('click', () => {
       })
       .then(user => {
         // Use preferred name if available, otherwise fall back to first name
-        const displayName = user.preferredName || user.firstName;
+        console.log(user)
+        // const displayName = user.preferredName || user.firstName;
+        const displayName = user.firstName;
         localStorage.setItem('userName', displayName);
         localStorage.setItem('userEmail', user.Email);
         localStorage.setItem('userId', user.userID);
@@ -114,7 +110,7 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
 
   const regEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
   const regPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/
-  const regMiddleInitial = /^[a-zA-Z]$/
+  // const regMiddleInitial = /^[a-zA-Z]$/
   const regPhone = /^\s*(?:\+?(\d{1,3}))?([-. (]*(\d{3})[-. )]*)?((\d{3})[-. ]*(\d{2,4})(?:[-.x ]*(\d+))?)\s*$/
   const regDiscord = /^[a-zA-Z0-9_]+#[0-9]{4}$/
 
@@ -137,15 +133,15 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
   }
 
   let strFirstName = document.querySelector("#txtFirstName").value
-  let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
+  // let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
   let strLastName = document.querySelector("#txtLastName").value
-  let strPreferredName = document.querySelector("#txtPreferredName").value
-  if (!regMiddleInitial.test(strMiddleInitial) && document.querySelector("#txtMiddleInitial").value) {
-    strErrorMessage += `<p>Please enter a valid middle initial</p>`
-  }
-  if (strPreferredName === strFirstName || strPreferredName === strMiddleInitial || strPreferredName === strLastName) {
-    strPreferredName = ""
-  }
+  // let strPreferredName = document.querySelector("#txtPreferredName").value
+  // if (!regMiddleInitial.test(strMiddleInitial) && document.querySelector("#txtMiddleInitial").value) {
+  //   strErrorMessage += `<p>Please enter a valid middle initial</p>`
+  // }
+  // if (strPreferredName === strFirstName || strPreferredName === strMiddleInitial || strPreferredName === strLastName) {
+  //   strPreferredName = ""
+  // }
 
   let strPhone = document.querySelector("#txtPhone").value
   if (!regPhone.test(strPhone) && document.querySelector("#txtPhone").value) {
@@ -197,12 +193,12 @@ document.querySelector('#btnRegister').addEventListener('click', () => {
     }
 
     // Add optional fields only if they are not empty
-    if (strMiddleInitial) {
-      newUser.middleInitial = strMiddleInitial
-    }
-    if (strPreferredName) {
-      newUser.preferredName = strPreferredName
-    }
+    // if (strMiddleInitial) {
+    //   newUser.middleInitial = strMiddleInitial
+    // }
+    // if (strPreferredName) {
+    //   newUser.preferredName = strPreferredName
+    // }
     if (strPhone) {
       newUser.phone = strPhone
     }
