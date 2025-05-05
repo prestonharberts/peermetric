@@ -821,73 +821,75 @@ app.delete('/course/:courseId', validateSession, async (req, res, next) => {
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
 app.post('/course/:courseId/student/:studentId', validateSession, async (req, res, next) => {
-    // Validate params
-    if(regexUUID.test(req.params.courseId) && regexUUID.test(req.params.studentId)) {
-        let objError = null
+  // Validate params
+  if(!regexUUID.test(req.params.courseId) || !regexUUID.test(req.params.studentId)) {
+    res.status(400).json({})
+  }
+  let objError = null
 
-        // Check if the course exists
-        let resultCourse = null
-        let strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
-        await db.get(strCommand, [req.params.courseId], function(error, result) {
-            objError = error
-            resultCourse = result
-        })
-        if(objError) {
-            console.error("DB error searching courses: \n\t" + objError)
-            res.status(500).json({})
-            return
-        } else if(resultCourse == null) {
-            // goofy ah
-            res.status(404).json({})
-            return
-        }
+  // Check if the course exists
+  let resultCourse = null
+  let strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [req.params.courseId], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultCourse == null) {
+    // goofy ah
+    res.status(404).json({})
+    return
+  }
 
-        // Check if the student exists
-        let resultStudent = null
-        strCommand = `SELECT * FROM tblUsers WHERE UserID = ?`
-        await db.get(strCommand, [req.params.studentId], function(error, result) {
-            objError = error
-            resultStudent = result
-        })
-        if(objError) {
-            console.error("DB error searching users: \n\t" + objError)
-            res.status(500).json({})
-            return
-        } else if(resultStudent == null) {
-            res.status(404).json({})
-            return
-        }
+  // Check if the student exists
+  let resultStudent = null
+  strCommand = `SELECT * FROM tblUsers WHERE UserID = ?`
+  await db.get(strCommand, [req.params.studentId], function(error, result) {
+    objError = error
+    resultStudent = result
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error searching users: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultStudent == null) {
+    res.status(404).json({})
+    return
+  }
 
-        // Check if the current user is the owner of the course
-        let resultSession = null
-        strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
-        await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
-            objError = error
-            resultSession = result
-        })
-        if(objError) {
-            console.error("DB error searching sessions: \n\t" + objError)
-            res.status(500).json({})
-            return
-        } else if(resultSession.UserID != resultCourse.OwnerID) {
-            res.status(401).json({})
-            return
-        }
+  // Check if the current user is the owner of the course
+  let resultSession = null
+  strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession.UserID != resultCourse.OwnerID) {
+    res.status(401).json({})
+    return
+  }
 
-        // Add the student to the course
-        strCommand = `INSERT INTO tblStudents (CourseID, StudentID) VALUES (?, ?)`
-        await db.run(strCommand, [req.params.courseId, req.params.studentId], function(error) {
-            if(error) {
-                console.error("DB error adding student to course: \n\t" + error)
-                res.status(500).json({})
-                return
-            } else {
-                res.status(201).json({})
-            }
-        })
+  // Add the student to the course
+  strCommand = `INSERT INTO tblStudents (CourseID, UserID) VALUES (?, ?)`
+  await db.run(strCommand, [req.params.courseId, req.params.studentId], function(error) {
+    if(error) {
+      console.error("DB error adding student to course: \n\t" + error)
+      res.status(500).json({})
+      return
     } else {
-        res.status(400).json({})
+      res.status(201).json({})
     }
+  })
 })
 
 // Remove student from course
@@ -1910,6 +1912,72 @@ app.post('/group/:groupId/response/:reviewSpecId', validateSession, async (req, 
   if(objError) {
     console.error("DB error creating response: \n\t" + objError)
     res.status(500).json({})
+    return
+  }
+})
+
+// Search for response ids
+// GET /responses
+// with querystring groupId reviewSpecId reviewerId targetId
+// with cookie SESSION_ID
+// Returns 200 OK and array of all response records if successful
+// Returns 500 Internal Server Error on database failure
+app.get('/responses', validateSession, async (req, res) => {
+  let objError = null
+  let resultResponses = null
+  let strCommand = `SELECT ResponseID FROM tblResponses`
+  let arrQuerys = []
+  let intCount = 0
+
+  // If querys exists, plop them in the SQLite
+  if(req.query.groupId || req.query.reviewSpecId || req.query.reviewerId || req.query.targetId) {
+    strCommand += ` WHERE`
+  }
+  if(req.query.groupId) {
+    intCount++
+    strCommand += ` GroupID = ?`
+    arrQuerys.push(req.query.groupId)
+  }
+  if(req.query.reviewSpecId) {
+    if(intCount > 0) {
+      strCommand += ` AND`
+    }
+    intCount++
+    strCommand += ` ReviewSpecID = ?`
+    arrQuerys.push(req.query.reviewSpecId)
+  }
+  if(req.query.reviewerId) {
+    if(intCount > 0) {
+      strCommand += ` AND`
+    }
+    intCount++
+    strCommand += ` ReviewerID = ?`
+    arrQuerys.push(req.query.reviewerId)
+  }
+  if(req.query.targetId) {
+    if(intCount > 0) {
+      strCommand += ` AND`
+    }
+    intCount++
+    strCommand += ` TargetID = ?`
+    arrQuerys.push(req.query.targetId)
+  }
+
+  await db.all(strCommand, arrQuerys, function(error, result) {
+    objError = error
+    resultResponses = result
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error searching responses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultResponses == null) {
+    // No responses found
+    res.status(404).json({})
+    return
+  } else {
+    res.status(200).json(resultResponses)
     return
   }
 })
