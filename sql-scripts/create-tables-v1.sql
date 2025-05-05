@@ -37,10 +37,10 @@ CREATE TABLE `tblReviewSpecifications` (
 
 CREATE TABLE `tblStudents` (
   `UserID` text NOT NULL,
-  `CourseCode` text NOT NULL,
+  `CourseID` text NOT NULL,
   `GroupID` text,
   FOREIGN KEY (`UserID`) REFERENCES `tblUsers`(`UserID`),
-  FOREIGN KEY (`CourseCode`) REFERENCES `tblCourses`(`CourseCode`),
+  FOREIGN KEY (`CourseID`) REFERENCES `tblCourses`(`CourseID`),
   FOREIGN KEY (`GroupID`) REFERENCES `tblGroups` (`GroupID`),
   Primary Key (`UserID`, `CourseCode`)
 );
