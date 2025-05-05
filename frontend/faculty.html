@@ -36,7 +36,7 @@
         </h3>
       </div>
       <div class="col text-end">
-        <a href="index.html" style="text-decoration: none;">
+        <a href="index.html" id="signOutLink" style="text-decoration: none;">
           <h5 class="mb-0 text-primary">
             Sign out
           </h5>
@@ -256,6 +256,13 @@
     } else {
       userNameHeader.textContent = 'No name found'
     }
+
+    document.getElementById('signOutLink').addEventListener('click', function (event) {
+      event.preventDefault(); // Stop default link behavior
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    });
   </script>
 </body>
 

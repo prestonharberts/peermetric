@@ -1,3 +1,8 @@
+const currentUserId = localStorage.getItem('userId');
+
+let courseMap = {};
+let userMap = {};
+
 async function initializeDashboard() {
   try {
     const [resCourses, resGroups, resStudents, resResponses, resUsers] = await Promise.all([
@@ -18,16 +23,16 @@ async function initializeDashboard() {
     studentList = await resStudents.json();
     responseList = await resResponses.json();
 
-    courseMap = {};
     for (const course of rawCourses) {
+      // if (course.InstructorID === currentUserId) {
       courseMap[course.CourseID] = {
         courseID: course.CourseID,
         courseCode: course.CourseCode,
         courseName: course.CourseName
-      };
+        // }
+      }
     }
 
-    userMap = {};
     for (const user of rawUsers) {
       userMap[user.UserID] = {
         userID: user.UserID,
@@ -106,6 +111,8 @@ function renderGroupTable() {
   }
 
   for (const [groupID, groupData] of Object.entries(groupDataMap)) {
+    // if (!courseMap[groupData.courseID]) continue;
+
     const memberIDs = groupData.members;
     const studentCount = memberIDs.length;
     const expectedReviews = studentCount * (studentCount - 1);
