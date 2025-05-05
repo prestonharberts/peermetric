@@ -34,7 +34,7 @@ async function initializeDashboard() {
         firstName: user.FirstName,
         lastName: user.LastName,
         email: user.Email,
-        bio: user.Bio
+        bio: user.bio
       };
     }
 
@@ -181,6 +181,67 @@ document.getElementById('txtSearchGroups').addEventListener('input', function ()
     const values = Array.from(row.children).map(cell => cell.textContent.toLowerCase());
     const isVisible = values.some(text => text.includes(searchQuery));
     row.style.display = isVisible ? '' : 'none';
+  }
+});
+
+// Event listener for the "Leave Group" button
+// Copilot assisted
+document.getElementById('btnLeaveGroup').addEventListener('click', async () => {
+  const userId = localStorage.getItem('userId'); // Assuming userId is stored in localStorage
+  const groupId = localStorage.getItem('groupId'); // Assuming groupId is stored in localStorage
+
+  if (!userId || !groupId) {
+    Swal.fire({
+      title: 'Error!',
+      text: 'Unable to identify the user or group.',
+      icon: 'error',
+      confirmButtonText: 'Close'
+    });
+    return;
+  }
+
+  const confirmation = await Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you really want to leave this group?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, leave group',
+    cancelButtonText: 'Cancel'
+  });
+
+  if (confirmation.isConfirmed) {
+    try {
+      const response = await fetch(`http://localhost:1025/groups/${groupId}/removeUser`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId })
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          title: 'Success!',
+          text: 'You have successfully left the group.',
+          icon: 'success',
+          confirmButtonText: 'Close'
+        }).then(() => {
+          // Optionally reload the page or update the UI
+          window.location.reload();
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to leave the group.');
+      }
+    } catch (error) {
+      console.error('Error leaving group:', error);
+      Swal.fire({
+        title: 'Error!',
+        text: error.message || 'An error occurred while leaving the group.',
+        icon: 'error',
+        confirmButtonText: 'Close'
+      });
+    }
   }
 });
 
