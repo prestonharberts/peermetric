@@ -1435,15 +1435,66 @@ app.get('/group/:groupId/responses', validateSession, (req, res) => {
 // POST /course/{courseId}/reviewSpec
 // with body.liveDate body.expiryDate
 // with cookie SESSION_ID
-// Returns 201 Created if successful
+// Returns 201 Created and reviewSpecId if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.post('/course/:courseId/reviewSpec', validateSession, (req, res, next) => {
-  // TODO add actual validation and review spec creation
-  if (req.params.courseId && req.body.liveDate && req.body.expiryDate) {
-    res.status(201).json({ reviewSpecId: "reviewSpecId" })
-  } else {
+app.post('/course/:courseId/reviewSpec', validateSession, async (req, res, next) => {
+  // Validate params
+  if(!regexUUID.test(req.params.courseId) || !req.body.liveDate || !req.body.expiryDate) {
     res.status(400).json({})
+    return
+  }
+  let objError = null
+
+  // Check if the course exists
+  let resultCourse = null
+  let strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [req.params.courseId], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  if(objError) {
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultCourse == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if the current user is the owner of the course
+  let resultSession = null
+  strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(401).json({})
+    return
+  }
+
+  if(resultSession.UserID != resultCourse.OwnerID) {
+    res.status(401).json({})
+    return
+  }
+
+  // Create the review spec
+  let strReviewSpecId = uuidv4()
+  strCommand = `INSERT INTO tblReviewSpecifications (ReviewSpecID, CourseID, LiveDate, ExpiryDate) VALUES (?, ?, ?, ?)`
+  await db.run(strCommand, [strReviewSpecId, req.params.courseId, req.body.liveDate, req.body.expiryDate], function(error) {
+    objError = error
+  })
+  if(objError) {
+    console.error("DB error creating review spec: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else {
+    res.status(201).json({ reviewSpecId: strReviewSpecId })
   }
 })
 
