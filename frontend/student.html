@@ -47,12 +47,12 @@
     <!-- ACCORDION CONTAINER -->
     <div class="accordion mb-3" id="formAccordion">
 
-      <!-- CREATE SURVEY -->
+      <!-- TAKE SURVEY -->
       <div class="card shadow mb-3">
         <div class="card-header bg-success text-light">
           <h2 class="mb-0">
             <button class="btn text-light w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSurvey" aria-expanded="true" aria-controls="collapseSurvey">
-              <b>Create Survey</b>
+              <b>Take Survey</b>
             </button>
           </h2>
         </div>
@@ -62,161 +62,41 @@
               <!-- ROW -->
               <!-- GAP -->
               <div class="row g-2 mb-2">
-                <div class="col-md-6">
-                  <!-- input for survey recipient group -->
+                <div class="col-md-4">
+                  <!-- input for survey taker's group -->
                   <select id="surveyRecipientGroup" class="form-control" aria-label="select recipient group">
-                    <option value="" selected hidden>Select recipient group</option>
+                    <option value="" selected hidden>Select your group</option>
                     <option value="All groups">All groups</option>
                     <option value="Group 1">Group 1 (Preston, Kyle)</option>
                     <option value="Group 2">Group 2 (Ezra, Javontae)</option>
                   </select>
                 </div>
-                <div class="col-md-6">
-                  <!-- input for survey title -->
-                  <input id="surveyTitle" type="text" class="form-control" placeholder="Enter survey title" aria-label="input survey title" />
+                <div class="col-md-4">
+                  <!-- input for survey recipient -->
+                  <input id="surveyTitle" type="text" class="form-control" placeholder="Enter recipient's name" aria-label="input survey title" />
+                </div>
+                <div class="col-md-4">
+                    <select id="surveyType" class="form-control" aria-label="select survey type">
+                      <option value="" selected hidden>Select visibility</option>
+                      <option value="Private">Private</option>
+                      <option value="Public">Public</option>
+                    </select>
                 </div>
               </div>
               <div class="row g-2 mb-2">
-                <div class="col-md-2">
-                  <!-- input for survey due date -->
-                  <input id="surveyDueDate" type="date" class="form-control" required aria-label="input due date" />
-                </div>
-                <div class="col-md-4">
-                  <!-- input for faculty review requirement -->
-                  <select id="txtFacultyReviewRequirement" class="form-control" aria-label="select review requirement">
-                    <option value="" selected hidden>Require faculty review</option>
-                    <option value="Yes">Yes (wait to release results)</option>
-                    <option value="No">No (release results upon completion)</option>
-                    <option value="No results">Do not release any results</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <!-- input for number of survey questions -->
-                  <input id="txtSurveyQuestionCount" type="text" class="form-control" placeholder="Number of questions" aria-label="input question count" />
-                </div>
+                <!-- Incoming survey goes here -->
+
+              </div>
+              <div class="row g-2 mb-2">        
                 <div class="col-md-2">
                   <!-- submit button -->
-                  <button type="submit" id="btnCreateSurvey" class="btn btn-success w-100">Create Survey</button>
+                  <button type="submit" id="btnSubmitSurvey" class="btn btn-success w-100">Submit Survey</button>
                 </div>
               </div>
             </form>
           </div>
         </div>
       </div>
-
-      <!-- CREATE GROUP -->
-      <div class="card shadow mb-3">
-        <div class="card-header bg-success text-light">
-          <h2 class="mb-0">
-            <button class="btn text-light w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroup" aria-expanded="false" aria-controls="collapseGroup">
-              <b>Create Group</b>
-            </button>
-          </h2>
-        </div>
-        <div id="collapseGroup" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
-          <div class="card-body">
-            <form id="formAssignGroup" onsubmit="return true">
-              <!-- ROW -->
-              <!-- GAP -->
-              <div class="row g-2 mb-2">
-                <div class="col-md-4">
-                  <!-- input for assigned course -->
-                  <select id="assignCourse" class="form-control" aria-label="Select course">
-                    <option value="" selected hidden>Select course</option>
-                    <option value="csc3100">CSC 3100</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <!-- input for group name -->
-                  <input id="assignGroupName" type="text" class="form-control" placeholder="Enter group name" aria-label="Group name" />
-                </div>
-                <div class="col-md-4">
-                  <!-- input for assigned task -->
-                  <input id="assignGroupTask" type="text" class="form-control" placeholder="Assigned task or project" aria-label="Assigned task" />
-                </div>
-              </div>
-              <div class="row g-2 mb-2">
-                <div class="col-md-2">
-                  <!-- input for due date -->
-                  <input id="assignGroupDueDate" type="date" class="form-control" required aria-label="Due date" />
-                </div>
-                <div class="col-md-8">
-                  <!-- input for members list -->
-                  <input id="assignGroupMembers" type="text" class="form-control" placeholder="Enter member names" aria-label="Group members" />
-                </div>
-                <div class="col-md-2">
-                  <!-- submit button -->
-                  <button type="submit" id="btnAssignGroup" class="btn btn-success w-100">Create Group</button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- CREATE COURSE -->
-      <div class="card shadow mb-3">
-        <div class="card-header bg-success text-light">
-          <h2 class="mb-0">
-            <button class="btn text-light w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCourse" aria-expanded="false" aria-controls="collapseCourse">
-              <b>Create Course</b>
-            </button>
-          </h2>
-        </div>
-        <div id="collapseCourse" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
-          <div class="card-body">
-            <!-- add task inputs (Bootstrap-styled, with aria-labels) -->
-            <form id="formCreateCourse" onsubmit="return true">
-              <!-- ROW -->
-              <!-- GAP -->
-              <div class="row g-2 mb-2">
-                <div class="col-md-4">
-                  <!-- input for course code -->
-                  <input id="CourseID" type="text" class="form-control" placeholder="Enter course ID" aria-label="Course code" />
-                </div>
-                <div class="col-md-8">
-                  <!-- input for course name -->
-                  <input id="CourseName" type="text" class="form-control" placeholder="Enter course name" aria-label="Course name" />
-                </div>
-              </div>
-              <div class="row g-2 mb-2">
-                <!-- input for student list -->
-                <textarea id="courseStudents" name="courseStudents" rows="4" class="form-control" placeholder="Enter student names" aria-label="Student list"></textarea>
-                <div class="d-flex">
-                  <button type="submit" id="btnCreateCourse" class="btn btn-success ms-auto">Create Course</button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- COURSE LIST TABLE -->
-    <div class="card shadow mb-3">
-      <div class="card-header bg-primary text-light">
-        <b>Course List</b>
-      </div>
-
-      <div class="card-body">
-        <!-- search box -->
-        <!-- <input type="text" id="surveySearch" class="form-control mb-3" placeholder="Search course, group, member..." aria-label="search course list" /> -->
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead class="thead-dark">
-              <tr>
-                <th>Course</th>
-                <th>Students</th>
-                <th>Evaluations</th>
-              </tr>
-            </thead>
-            <tbody id="courseList">
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
 
     <!-- GROUP LIST TABLE -->
     <div class="card shadow">
@@ -240,10 +120,15 @@
             </thead>
             <tbody id="groupList">
             </tbody>
+          </table>
         </div>
       </div>
     </div>
-  </div>
+
+  <!-- LEAVE GROUP BUTTON -->
+    <div class="d-flex justify-content-center mt-3">
+        <button type="button" id="btnLeaveGroup" class="btn btn-danger">Leave Group</button>
+    </div>
 
   <!-- JS SCRIPTS -->
   <script src="js/lib/bootstrap.bundle.min.js"></script>

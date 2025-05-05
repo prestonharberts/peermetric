@@ -38,7 +38,7 @@ async function initializeDashboard() {
       };
     }
 
-    renderCourseTable();
+    //renderCourseTable();
     renderGroupTable();
 
   } catch (error) {
@@ -51,40 +51,40 @@ async function initializeDashboard() {
   }
 }
 
-function renderCourseTable() {
-  const tableBody = document.getElementById('courseList');
-  tableBody.innerHTML = '';
+// function renderCourseTable() {
+//   const tableBody = document.getElementById('courseList');
+//   tableBody.innerHTML = '';
 
-  for (const course of Object.values(courseMap)) {
-    const courseID = course.courseID;
-    const relatedGroups = groupList.filter(g => g.CourseID === courseID);
+//   for (const course of Object.values(courseMap)) {
+//     const courseID = course.courseID;
+//     const relatedGroups = groupList.filter(g => g.CourseID === courseID);
 
-    let totalStudents = 0;
-    let totalReviewsSubmitted = 0;
-    let totalReviewsExpected = 0;
+//     let totalStudents = 0;
+//     let totalReviewsSubmitted = 0;
+//     let totalReviewsExpected = 0;
 
-    for (const group of relatedGroups) {
-      const studentsInGroup = studentList.filter(s => s.GroupID === group.GroupID);
-      const groupSize = studentsInGroup.length;
+//     for (const group of relatedGroups) {
+//       const studentsInGroup = studentList.filter(s => s.GroupID === group.GroupID);
+//       const groupSize = studentsInGroup.length;
 
-      totalStudents += groupSize;
-      totalReviewsExpected += groupSize * (groupSize - 1);
-      totalReviewsSubmitted += responseList.filter(r => r.GroupID === group.GroupID).length;
-    }
+//       totalStudents += groupSize;
+//       totalReviewsExpected += groupSize * (groupSize - 1);
+//       totalReviewsSubmitted += responseList.filter(r => r.GroupID === group.GroupID).length;
+//     }
 
-    const submissionRate = totalReviewsExpected > 0
-      ? Math.round((totalReviewsSubmitted / totalReviewsExpected) * 100)
-      : 0;
+//     const submissionRate = totalReviewsExpected > 0
+//       ? Math.round((totalReviewsSubmitted / totalReviewsExpected) * 100)
+//       : 0;
 
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td><a class="pill-button" href="#">${course.courseCode} - ${course.courseName}</a></td>
-      <td><a class="pill-button" href="#">${totalStudents} student${totalStudents !== 1 ? 's' : ''}</a></td>
-      <td><a class="pill-button" href="#">${totalReviewsSubmitted}/${totalReviewsExpected} submitted (${submissionRate}%)</a></td>
-    `;
-    tableBody.appendChild(row);
-  }
-}
+//     const row = document.createElement('tr');
+//     row.innerHTML = `
+//       <td><a class="pill-button" href="#">${course.courseCode} - ${course.courseName}</a></td>
+//       <td><a class="pill-button" href="#">${totalStudents} student${totalStudents !== 1 ? 's' : ''}</a></td>
+//       <td><a class="pill-button" href="#">${totalReviewsSubmitted}/${totalReviewsExpected} submitted (${submissionRate}%)</a></td>
+//     `;
+//     tableBody.appendChild(row);
+//   }
+// }
 
 function renderGroupTable() {
   const tableBody = document.getElementById('groupList');
@@ -136,42 +136,42 @@ function renderGroupTable() {
   }
 }
 
-document.getElementById("formCreateCourse").addEventListener("submit", function (event) {
-  event.preventDefault();
+// document.getElementById("formCreateCourse").addEventListener("submit", function (event) {
+//   event.preventDefault();
 
-  const courseID = document.getElementById("CourseID").value.trim();
-  const courseName = document.getElementById("CourseName").value.trim();
-  const studentText = document.getElementById("courseStudents").value.trim();
+//   const courseID = document.getElementById("CourseID").value.trim();
+//   const courseName = document.getElementById("CourseName").value.trim();
+//   const studentText = document.getElementById("courseStudents").value.trim();
 
-  if (!courseID || !courseName) {
-    alert("Please fill in all required fields.");
-    return;
-  }
+//   if (!courseID || !courseName) {
+//     alert("Please fill in all required fields.");
+//     return;
+//   }
 
-  courseMap[courseID] = {
-    courseID: courseID,
-    courseCode: courseID,
-    courseName: courseName
-  };
+//   courseMap[courseID] = {
+//     courseID: courseID,
+//     courseCode: courseID,
+//     courseName: courseName
+//   };
 
-  const emailList = studentText.replace(/,/g, " ").split(/\s+/).filter(Boolean);
+//   const emailList = studentText.replace(/,/g, " ").split(/\s+/).filter(Boolean);
 
-  groupList.push({
-    GroupID: "No group",
-    CourseID: courseID
-  });
+//   groupList.push({
+//     GroupID: "No group",
+//     CourseID: courseID
+//   });
 
-  for (const email of emailList) {
-    studentList.push({
-      UserEmail: email,
-      CourseID: courseID,
-      GroupID: "No group"
-    });
-  }
+//   for (const email of emailList) {
+//     studentList.push({
+//       UserEmail: email,
+//       CourseID: courseID,
+//       GroupID: "No group"
+//     });
+//   }
 
-  this.reset();
-  renderCourseTable();
-});
+//   this.reset();
+//   renderCourseTable();
+// });
 
 document.getElementById('txtSearchGroups').addEventListener('input', function () {
   const searchQuery = this.value.toLowerCase();
