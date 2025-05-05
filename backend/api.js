@@ -2040,12 +2040,87 @@ app.get('/response/:responseId/private', validateSession, async (req, res, next)
 // Returns 201 Created if successfully deleted
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.delete('/response/:responseId', validateSession, (req, res, next) => {
-  // TODO add actual validation and response delete
-  if (req.params.responseId) {
-    res.status(201).json({})
-  } else {
+app.delete('/response/:responseId', validateSession, async (req, res, next) => {
+  // Validate param
+  if(!regexUUID.test(req.params.responseId)) {
     res.status(400).json({})
+    return
+  }
+  let objError = null
+
+  // Check if the response exists
+  let resultResponse = null
+  let strCommand = `SELECT * FROM tblResponses WHERE ResponseID = ?`
+  await db.get(strCommand, [req.params.responseId], function(error, result) {
+    objError = error
+    resultResponse = result
+  })
+  if(objError) {
+    console.error("DB error searching responses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultResponse == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if the current user is the course owner
+  let resultSession = null
+  let resultGroup = null
+  let resultCourse = null
+
+  strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(401).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblGroups WHERE GroupID = ?`
+  await db.get(strCommand, [resultResponse.GroupID], function(error, result) {
+    objError = error
+    resultGroup = result
+  })
+  if(objError || resultGroup == null) {
+    console.error("DB error searching groups: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [resultGroup.CourseID], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  if(objError || resultCourse == null) {
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  if(resultSession.UserID != resultCourse.OwnerID) {
+    res.status(401).json({})
+    return
+  }
+
+  // Delete the response
+  strCommand = `DELETE FROM tblResponses WHERE ResponseID = ?`
+  await db.run(strCommand, [req.params.responseId], function(error) {
+    objError = error
+  })
+  if(objError) {
+    console.error("DB error deleting response: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else {
+    res.status(201).json({})
   }
 })
 
