@@ -72,8 +72,7 @@ function validateSession(req, res, next){
 app.post('/session', (req, res, next) => {
     // Make sure they don't already have a session cookie
     if(req.cookies.SESSION_ID != null) {
-        res.status(400).json({})
-        return
+        res.clearCookie('SESSION_ID')
     }
     // Validate that the email and password are not empty
     if(req.body.email != null && req.body.password != null) {
@@ -100,7 +99,7 @@ app.post('/session', (req, res, next) => {
                         })
                         res.cookie('SESSION_ID', strSessionId, {
                             httpOnly: true,
-                            expires: unixtimeExpireTime, //12 hours
+                            expires: Date(unixtimeExpireTime), //12 hours
                             sameSite: 'Strict',
                             secure: false // Set to true with HTTPS
                         }).status(201).json({})
@@ -917,9 +916,71 @@ app.delete('/course/:courseId/student/:studentId', validateSession, async (req, 
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.post('/course/:courseId/group', validateSession, (req, res, next) => {
-    // TODO add actual validation and group creation
-    res.status(201).json({groupId: "groupId"})
+app.post('/course/:courseId/group', validateSession, async (req, res, next) => {
+    // Validate params
+    if(!regexUUID.test(req.params.courseId)) {
+        res.status(400).json({})
+    }
+    let objError = null
+
+    // Check if the course exists
+    let resultCourse = null
+    let strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+    await db.get(strCommand, [req.params.courseId], function(error, result) {
+        objError = error
+        resultCourse = result
+    })
+    if(objError) {
+        console.error("DB error searching courses: \n\t" + objError)
+        res.status(500).json({})
+        return
+    } else if(resultCourse == null) {
+        // goofy ah
+        res.status(404).json({})
+        return
+    }
+
+    // Check if the current user is the owner of the course or a student in the course
+    let resultSession = null
+    let resultStudent = null
+    strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+    await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+        objError = error
+        resultSession = result
+    })
+    if(objError) {
+        console.error("DB error searching sessions: \n\t" + objError)
+        res.status(500).json({})
+        return
+    } else if(resultSession == null) {
+        res.status(401).json({})
+        return
+    }
+    strCommand = `SELECT * FROM tblStudents WHERE CourseID = ? AND StudentID = ?`
+    await db.get(strCommand, [req.params.courseId, resultSession.UserID], function(error, result) {
+        objError = error
+        resultStudent = result
+    })
+    if(objError) {
+        console.error("DB error searching students: \n\t" + objError)
+        res.status(500).json({})
+        return
+    }
+    if(resultSession.UserID != resultCourse.OwnerID || resultSession.UserID != resultStudent.StudentID) {
+        
+    }
+    // Create the group
+    let strGroupId = uuidv4()
+    strCommand = `INSERT INTO tblGroups (GroupID, CourseID) VALUES (?, ?)`
+    await db.run(strCommand, [strGroupId, req.params.courseId], function(error) {
+        if(error) {
+            console.error("DB error creating group: \n\t" + error)
+            res.status(500).json({})
+            return
+        } else {
+            res.status(201).json({groupId: strGroupId})
+        }
+    })
 })
 
 // Update group
