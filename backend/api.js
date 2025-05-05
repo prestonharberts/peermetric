@@ -568,8 +568,15 @@ app.get('/course/:courseId', validateSession, (req, res, next) => {
                         return
                     } else if(result.OwnerID == strUserId) {
                         // User owns the course
-                        res.status(200).json(compileCourseObject(req.params.courseId))
-                        return
+                        let objCourse = compileCourseObject(req.params.courseId)
+                        if(objCourse == null) {
+                            // Error
+                            res.status(500).json({})
+                            return
+                        } else {
+                            res.status(200).json(compileCourseObject(req.params.courseId))
+                            return
+                        }
                     } else {
                         // User is student in course?
                         strCommand = `SELECT * FROM tblStudents WHERE CourseID = ? AND StudentID = ?`
@@ -580,7 +587,15 @@ app.get('/course/:courseId', validateSession, (req, res, next) => {
                                 return
                             } else if(result != null) {
                                 // User is student
-                                res.status(200).json(compileCourseObject(req.params.courseId))
+                                let objCourse = compileCourseObject(req.params.courseId)
+                                if(objCourse == null) {
+                                    // Error
+                                    res.status(500).json({})
+                                    return
+                                } else {
+                                    res.status(200).json(compileCourseObject(req.params.courseId))
+                                    return
+                                }
                             } else {
                                 // Bozo is not authorized to view this course
                                 res.status(401).json({user: "L Red Team"})
@@ -610,7 +625,7 @@ function compileCourseObject(courseId) {
     db.get(strCommand, [courseId], function(error, result) {
         if(error) {
             console.error("DB error searching courses: \n\t" + error)
-            throw error
+            return null
         } else {
             objCourse.ownerId = result.OwnerID
             objCourse.courseCode = result.CourseCode
@@ -621,7 +636,7 @@ function compileCourseObject(courseId) {
     db.all(strCommand, [courseId], function(error, result) {
         if(error) {
             console.error("DB error searching courses: \n\t" + error)
-            throw error
+            return null
         } else if(result != null) {
             objCourse.groupList.push(...result.GroupID)
         }
@@ -630,7 +645,7 @@ function compileCourseObject(courseId) {
     db.get(strCommand, [courseId], function(error, result) {
         if(error) {
             console.error("DB error searching courses: \n\t" + error)
-            throw error
+            return null
         } else if(result != null) {
             objCourse.studentList.push(...result.UserID)
         }
@@ -684,40 +699,57 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                         // Unauthorized
                         res.status(401).json({})
                     } else {
+                        // Delete all responses related to the course
+                        let strCommand = `DELETE FROM tblResponses WHERE ReviewSpecID IN (SELECT ReviewSpecID FROM tlbReviewSpecs WHERE CourseID = ?)`
+                        db.run(strCommand, [req.params.courseId], function(error) {
+                            if(error) {
+                                console.error("DB error deleting responses: \n\t" + error)
+                                res.status(500).json({})
+                                return
+                            }
+                        })
+                        // Delete all review specifications related to the course
+                        strCommand = `DELETE FROM tblReviewSpecs WHERE CourseID = ?`
+                        db.run(strCommand, [req.params.courseId], function(error) {
+                            if(error) {
+                                console.error("DB error deleting review specs: \n\t" + error)
+                                res.status(500).json({})
+                                return
+                            }
+                        })
+                        // Delete every students' relationship to the course
+                        strCommand = `DELETE FROM tblStudents WHERE CourseID = ?`
+                        db.run(strCommand, [req.params.courseId], function(error) {
+                            if(error) {
+                                console.error("DB error deleting course: \n\t" + error)
+                                res.status(500).json({})
+                                return
+                            }
+                        })
+                        // Delete all groups related to the course
+                        strCommand = `DELETE FROM tblGroups WHERE CourseID = ?`
+                        db.run(strCommand, [req.params.courseId], function(error) {
+                            if(error) {
+                                console.error("DB error deleting course: \n\t" + error)
+                                res.status(500).json({})
+                                return
+                            }
+                        })
                         // Delete the course
-                        let strCommand = `DELETE FROM tblCourses WHERE CourseID = ?`
+                        strCommand = `DELETE FROM tblCourses WHERE CourseID = ?`
                         db.run(strCommand, [req.params.courseId], function(error) {
                             if(error) {
                                 console.error("DB error deleting course: \n\t" + error)
                                 res.status(500).json({})
                                 return
                             } else {
-                                // Delete all students' relationships to the course
-                                let strCommand = `DELETE FROM tblStudents WHERE CourseID = ?`
-                                db.run(strCommand, [req.params.courseId], function(error) {
-                                    if(error) {
-                                        console.error("DB error deleting course: \n\t" + error)
-                                        res.status(500).json({})
-                                    } else {
-                                        // Delete all groups related to the course
-                                        let strCommand = `DELETE FROM tblGroups WHERE CourseID = ?`
-                                        db.run(strCommand, [req.params.courseId], function(error) {
-                                            if(error) {
-                                                console.error("DB error deleting course: \n\t" + error)
-                                                res.status(500).json({})
-                                            } else {
-
-                                            }
-                                        })
-                                    }
-                                })
+                                res.status(201).json({})
                             }
                         })
                     }
                 })
             }
         })
-        // TODO delete course and all references
     } else {
         res.status(400).json({})
     }
