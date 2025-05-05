@@ -1588,18 +1588,86 @@ app.put('/reviewSpec/:reviewSpecId', validateSession, async (req, res, next) => 
 //   liveDate: string,
 //   expiryDate: string,
 // }
-app.get('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
-  // TODO add actual validation and review spec read
-  if (req.params.reviewSpecId) {
-    res.status(200).json({
-      reviewSpecId: "reviewSpecId",
-      courseId: "courseId",
-      liveDate: "UnixTimestamp",
-      expiryDate: "UnixTimestamp"
-    })
-  } else {
+app.get('/reviewSpec/:reviewSpecId', validateSession, async (req, res, next) => {
+  // Validate param
+  if(!regexUUID.test(req.params.reviewSpecId)) {
     res.status(400).json({})
+    return
   }
+  let objError = null
+
+  // Check if the review spec exists
+  let resultReviewSpec = null
+  let strCommand = `SELECT * FROM tblReviewSpecifications WHERE ReviewSpecID = ?`
+  await db.get(strCommand, [req.params.reviewSpecId], function(error, result) {
+    objError = error
+    resultReviewSpec = result
+  })
+  if(objError) {
+    console.error("DB error searching review specs: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultReviewSpec == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if the current user is the owner of the course or is a student in the course
+  let resultSession = null
+  let resultCourse = null
+  let resultStudent = null
+  strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(401).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [resultReviewSpec.CourseID], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  if(objError || resultCourse == null) {
+    // Something's rotten in the state of Denmark
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblStudents WHERE CourseID = ? AND UserID = ?`
+  await db.get(strCommand, [resultReviewSpec.CourseID, resultSession.UserID], function(error, result) {
+    objError = error
+    resultStudent = result
+  })
+  if(objError) {
+    console.error("DB error searching students: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  if(resultSession.UserID != resultCourse.OwnerID && resultSession.UserID != resultStudent.UserID) {
+    res.status(401).json({})
+    return
+  }
+
+  // Assemble the review spec object
+  let objReviewSpec = {
+    reviewSpecId: resultReviewSpec.ReviewSpecID,
+    courseId: resultReviewSpec.CourseID,
+    liveDate: resultReviewSpec.LiveDate,
+    expiryDate: resultReviewSpec.ExpiryDate
+  }
+
+  // Return the review spec object
+  res.status(200).json(objReviewSpec)
 })
 
 // Delete review spec
@@ -1608,12 +1676,75 @@ app.get('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
 // Returns 201 Created if successfully deleted
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.delete('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
-  // TODO add actual validation and review spec delete
-  if (req.params.reviewSpecId) {
-    res.status(201).json({})
-  } else {
+app.delete('/reviewSpec/:reviewSpecId', validateSession, async (req, res, next) => {
+  // Validate param
+  if(!regexUUID.test(req.params.reviewSpecId)) {
     res.status(400).json({})
+    return
+  }
+  let objError = null
+
+  // Check if the review spec exists
+  let resultReviewSpec = null
+  let strCommand = `SELECT * FROM tblReviewSpecifications WHERE ReviewSpecID = ?`
+  await db.get(strCommand, [req.params.reviewSpecId], function(error, result) {
+    objError = error
+    resultReviewSpec = result
+  })
+  if(objError) {
+    console.error("DB error searching review specs: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultReviewSpec == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if the current user is the owner of the course
+  let resultSession = null
+  let resultCourse = null
+
+  strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(401).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [resultReviewSpec.CourseID], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  if(objError || resultCourse == null) {
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  if(resultSession.UserID != resultCourse.OwnerID) {
+    res.status(401).json({})
+    return
+  }
+
+  // Delete the review spec
+  strCommand = `DELETE FROM tblReviewSpecifications WHERE ReviewSpecID = ?`
+  await db.run(strCommand, [req.params.reviewSpecId], function(error) {
+    objError = error
+  })
+  if(objError) {
+    console.error("DB error deleting review spec: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else {
+    res.status(201).json({})
   }
 })
 
