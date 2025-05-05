@@ -971,17 +971,46 @@ app.post('/course/:courseId/group', validateSession, async (req, res, next) => {
 
 // Update group
 // PUT /group/{groupId}
+// with body.groupName
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.put('/group/:groupId', validateSession, (req, res, next) => {
-  // TODO add actual validation and group update
-  if (req.params.groupId) {
-    res.status(201).json({})
-  } else {
+app.put('/group/:groupId', validateSession, async (req, res, next) => {
+  // Validate param
+  if(!regexUUID.test(req.params.groupId) || req.body.groupName == null) {
     res.status(400).json({})
+    return
   }
+  let objError = null
+
+  // Check if the group exists
+  let resultGroup = null
+  let strCommand = `SELECT * FROM tblGroups WHERE GroupID = ?`
+  await db.get(strCommand, [req.params.groupId], function(error, result) {
+    objError = error
+    resultGroup = result
+  })
+  if(objError) {
+    console.error("DB error searching groups: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultGroup == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Update the group
+  strCommand = `UPDATE tblGroups SET GroupName = ? WHERE GroupID = ?`
+  await db.run(strCommand, [req.body.groupName, req.params.groupId], function(error) {
+    if(error) {
+      console.error("DB error updating group: \n\t" + error)
+      res.status(500).json({})
+      return
+    } else {
+      res.status(201).json({})
+    }
+  })
 })
 
 // Read group
@@ -999,19 +1028,53 @@ app.put('/group/:groupId', validateSession, (req, res, next) => {
 //   ]
 // }
 app.get('/group/:groupId', validateSession, (req, res, next) => {
-  // TODO add actual validation and group read
-  if (req.params.groupId) {
-    res.status(200).json({
-      groupId: "groupId",
-      groupName: "Group 1",
-      groupMembers: [
-        "studentId0",
-        "studentId1"
-      ]
-    })
-  } else {
+  // Validate param
+  if(!regexUUID.test(req.params.groupId)) {
     res.status(400).json({})
+    return
   }
+  let objError = null
+  
+  // Check if the group exists
+  let resultGroup = null
+  let strCommand = `SELECT * FROM tblGroups WHERE GroupID = ?`
+  db.get(strCommand, [req.params.groupId], function(error, result) {
+    objError = error
+    resultGroup = result
+  })
+  if(objError) {
+    console.error("DB error searching groups: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultGroup == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Assemble the group object
+  let objGroup = {
+    groupId: resultGroup.GroupID,
+    courseID: resultGroup.CourseID,
+    groupName: resultGroup.GroupName,
+    groupMembers: []
+  }
+
+  // Get the group members
+  let resultGroupMembers = null
+  strCommand = `SELECT * FROM tblStudents WHERE GroupID = ?`
+  db.all(strCommand, [req.params.groupId], function(error, result) {
+    objError = error
+    resultGroupMembers = result
+  })
+  if(objError) {
+    console.error("DB error searching group members: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+  objGroup.groupMembers.push(...resultGroupMembers)
+  
+  // Return the group object
+  return objGroup
 })
 
 // Read all groups
