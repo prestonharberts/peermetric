@@ -1500,16 +1500,79 @@ app.post('/course/:courseId/reviewSpec', validateSession, async (req, res, next)
 
 // Update review spec
 // PUT /reviewSpec/{reviewSpecId}
+// with body.liveDate body.expiryDate
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.put('/reviewSpec/:reviewSpecId', validateSession, (req, res, next) => {
-  // TODO add actual validation and review spec update
-  if (req.params.reviewSpecId) {
-    res.status(201).json({})
-  } else {
+app.put('/reviewSpec/:reviewSpecId', validateSession, async (req, res, next) => {
+  // Validate params
+  if(!regexUUID.test(req.params.reviewSpecId) || !req.body.liveDate || !req.body.expiryDate) {
     res.status(400).json({})
+    return
+  }
+  let objError = null
+
+  // Check if the review spec exists
+  let resultReviewSpec = null
+  let strCommand = `SELECT * FROM tblReviewSpecifications WHERE ReviewSpecID = ?`
+  await db.get(strCommand, [req.params.reviewSpecId], function(error, result) {
+    objError = error
+    resultReviewSpec = result
+  })
+  if(objError) {
+    console.error("DB error searching review specs: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultReviewSpec == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if the current user is the owner of the course
+  let resultSession = null
+  let resultCourse = null
+  strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(401).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [resultReviewSpec.CourseID], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  if(objError || resultCourse == null) {
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  if(resultSession.UserID != resultCourse.OwnerID) {
+    res.status(401).json({})
+    return
+  }
+
+  // Update the review spec
+  strCommand = `UPDATE tblReviewSpecifications SET LiveDate = ?, ExpiryDate = ? WHERE ReviewSpecID = ?`
+  await db.run(strCommand, [req.body.liveDate, req.body.expiryDate, req.params.reviewSpecId], function(error) {
+    objError = error
+  })
+  if(objError) {
+    console.error("DB error updating review spec: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else {
+    res.status(201).json({})
   }
 })
 
