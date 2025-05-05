@@ -26,7 +26,7 @@
     <!-- PAGE HEADER -->
     <div class="row align-items-center mb-3 text-center">
       <div class="col text-start">
-        <h5 id="userNameHeader" class="mb-0">Hello, </h5>
+        <h5 id="userNameHeader" class="mb-0"></h5>
       </div>
       <div class="col-auto mx-auto">
         <h3 class="mb-0">
@@ -38,7 +38,7 @@
       <div class="col text-end">
         <a href="index.html" style="text-decoration: none;">
           <h5 class="mb-0 text-primary">
-            Log out
+            Sign out
           </h5>
         </a>
       </div>
@@ -172,34 +172,18 @@
               <div class="row g-2 mb-2">
                 <div class="col-md-4">
                   <!-- input for course code -->
-                  <input id="courseCode" type="text" class="form-control" placeholder="Enter course code" aria-label="Course code" />
+                  <input id="CourseID" type="text" class="form-control" placeholder="Enter course ID" aria-label="Course code" />
                 </div>
-                <div class="col-md-4">
-                  <!-- input for course section -->
-                  <input id="courseSection" type="text" class="form-control" placeholder="Enter course section" aria-label="Course section" />
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-8">
                   <!-- input for course name -->
-                  <input id="courseName" type="text" class="form-control" placeholder="Enter course name" aria-label="Course name" />
+                  <input id="CourseName" type="text" class="form-control" placeholder="Enter course name" aria-label="Course name" />
                 </div>
               </div>
               <div class="row g-2 mb-2">
-                <div class="col-md-6">
-                  <!-- input for student list -->
-                  <input id="courseStudents" type="text" class="form-control" placeholder="Enter student names" aria-label="Student list" />
-                </div>
-                <div class="col-md-4">
-                  <!-- input for semester -->
-                  <select id="courseSemester" class="form-control" aria-label="Select semester">
-                    <option value="" selected hidden>Select semester</option>
-                    <option value="spring2025">Spring 2025</option>
-                    <option value="summer2025">Summer 2025</option>
-                    <option value="fall2025">Fall 2025</option>
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <!-- submit button -->
-                  <button type="submit" id="btnCreateCourse" class="btn btn-success w-100">Create Course</button>
+                <!-- input for student list -->
+                <textarea id="courseStudents" name="courseStudents" rows="4" class="form-control" placeholder="Enter student names" aria-label="Student list"></textarea>
+                <div class="d-flex">
+                  <button type="submit" id="btnCreateCourse" class="btn btn-success ms-auto">Create Course</button>
                 </div>
               </div>
             </form>
@@ -223,8 +207,6 @@
             <thead class="thead-dark">
               <tr>
                 <th>Course</th>
-                <th>Name</th>
-                <th>Summary</th>
                 <th>Students</th>
                 <th>Evaluations</th>
               </tr>
@@ -266,33 +248,14 @@
   <script src="js/lib/bootstrap.bundle.min.js"></script>
   <script src="js/lib/sweetalert2.all.min.js"></script>
   <script src="js/faculty.js"></script>
-  <script src="js/sample-data.js"></script>
   <script>
-    document.getElementById('txtSearchGroups').addEventListener('input', function () {
-      const query = this.value.toLowerCase()
-      const rows = document.querySelectorAll('#taskList tr')
-
-      rows.forEach(row => {
-        const course = row.children[0].textContent.toLowerCase()
-        const group = row.children[1].textContent.toLowerCase()
-        const members = row.children[2].textContent.toLocaleLowerCase()
-        const evals = row.children[3].textContent.toLowerCase()
-
-        const match = course.includes(query) || group.includes(query) || members.includes(query) || evals.includes(query)
-        row.style.display = match ? '' : 'none'
-      })
-    })
-
     const userName = localStorage.getItem('userName')
+    const userNameHeader = document.getElementById('userNameHeader')
     if (userName) {
-      document.getElementById('userNameHeader').textContent += userName
+      userNameHeader.textContent += `Hello, ${userName}`
     } else {
-      document.getElementById('userNameHeader').textContent = 'No name found'
+      userNameHeader.textContent = 'No name found'
     }
-
-    populateCourseList(sampleCourses, sampleStudents, sampleGroups, sampleResponses)
-    populateGroupList(sampleStudents, sampleUsers, sampleCourses, sampleResponses);
-
   </script>
 </body>
 
