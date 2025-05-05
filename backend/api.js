@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { v4: uuidv4 } = require('uuid')
+const { v4: uuidv4, validate } = require('uuid')
 const bcrypt = require('bcrypt')
 const cookieParser = require('cookie-parser')
 const sqlite3 = require('sqlite3').verbose()
@@ -315,20 +315,42 @@ app.get('/user', validateSession, (req, res, next) => {
 //   bio: string
 // }
 app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
-  // TODO validate userId and get user
-  // res.status(200).json({
-  //     userId: "userId",
-  //     email: "abc@aol.com",
-  //     firstName: "Jill",
-  //     lastName: "Doe",
-  //     title: "Ms.",
-  //     phoneNumber: "123-456-0987",
-  //     otherContacts: "discord: JillDoe#1234"
-  // })
-  return res.status(501).json({
-    message: "Not yet built. Let me know when you need this!"
-  })
+    strSqlQuery = "SELECT * FROM tblUsers WHERE UserID = ?;"
+
+    db.get(strSqlQuery, req.params.userId, (err, row) => {
+        if (err)
+        {
+            console.error(err.message)
+            return res.status(500).json({
+                message: err.message
+            })
+        }
+        return res.status(200).json({
+            userID: row.UserID,
+            email: row.Email,
+            firstName: row.FirstName,
+            lastName: row.LastName,
+            middleInitial: row.MiddleInitial,
+            bio: row.Bio
+        })
+    })
 })
+// app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
+//     // TODO validate userId and get user
+//     // res.status(200).json({
+//     //     userId: "userId",
+//     //     email: "abc@aol.com",
+//     //     firstName: "Jill",
+//     //     lastName: "Doe",
+//     //     title: "Ms.",
+//     //     phoneNumber: "123-456-0987",
+//     //     otherContacts: "discord: JillDoe#1234"
+//     // })
+//     return res.status(501).json({
+//         message: "Not yet built. Let me know when you need this!"
+
+//   })
+// })
 
 // Read user
 // GET /user/byEmail/{email}
