@@ -58,7 +58,7 @@
         </div>
         <div id="collapseSurvey" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
           <div class="card-body">
-            <form id="formAddSurvey" onsubmit="return true">
+            <form id="formTakeSurvey" onsubmit="return true">
               <!-- ROW -->
               <!-- GAP -->
               <div class="row g-2 mb-2">
@@ -72,8 +72,10 @@
                   </select>
                 </div>
                 <div class="col-md-4">
-                  <!-- input for survey recipient -->
-                  <input id="surveyTitle" type="text" class="form-control" placeholder="Enter recipient's name" aria-label="input survey title" />
+                  <!-- selection box for survey recipient -->
+                  <select id="surveyRecipient" class="form-control" aria-label="select survey recipient">
+                    <option value="" selected hidden>Select recipient</option>
+                  </select>
                 </div>
                 <div class="col-md-4">
                     <select id="surveyType" class="form-control" aria-label="select survey type">
@@ -83,9 +85,8 @@
                     </select>
                 </div>
               </div>
-              <div class="row g-2 mb-2">
+              <div id="divInsertSurvey" class="row g-2 mb-2">
                 <!-- Incoming survey goes here -->
-
               </div>
               <div class="row g-2 mb-2">        
                 <div class="col-md-2">

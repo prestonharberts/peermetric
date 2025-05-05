@@ -34,7 +34,8 @@ async function initializeDashboard() {
         firstName: user.FirstName,
         lastName: user.LastName,
         email: user.Email,
-        bio: user.bio
+        phone: user.Phone,
+        bio: user.Bio
       };
     }
 
@@ -116,6 +117,7 @@ function renderGroupTable() {
             ? `<a class="pill-button" href="#">${user.firstName} ${user.lastName}</a>`
             : memberID;
         const email = user ? user.email : memberID;
+        const phone = user ? user.hone : memberID; // Assuming phone is part of the user object
         const bio = user ? user.bio : memberID; // Assuming bio is part of the user object
 
         const courseInfo = courseMap[groupData.courseID];
@@ -129,7 +131,7 @@ function renderGroupTable() {
           <td><a class="pill-button" href="#">${groupID}</a></td>
           <td>${userName}</td>
           <td><a class="pill-button" href="#">${email}</a></td>
-          <td><a class="pill-button" href="#">${bio}</a></td>
+          <td><a class="pill-button" href="#">Phone: ${phone}, Discord: ${bio}</a></td>
         `;
         tableBody.appendChild(row);
     }
@@ -245,4 +247,73 @@ document.getElementById('btnLeaveGroup').addEventListener('click', async () => {
   }
 });
 
-initializeDashboard();
+function populateIncomingSurvey(surveyData) {
+  const divInsertSurvey = document.getElementById('divInsertSurvey');
+
+  // Clear any existing content
+  divInsertSurvey.innerHTML = '';
+
+  // Create a card for the incoming survey
+  const surveyCard = document.createElement('div');
+  surveyCard.className = 'card shadow mb-3';
+
+  surveyCard.innerHTML = `
+    <div class="card-header bg-primary text-light">
+      <b>${surveyData.title}</b>
+    </div>
+    <div class="card-body">
+      <p><strong>Recipient Group:</strong> ${surveyData.recipientGroup}</p>
+      <p><strong>Due Date:</strong> ${surveyData.dueDate}</p>
+      <p><strong>Faculty Review:</strong> ${surveyData.facultyReview}</p>
+      <p><strong>Number of Questions:</strong> ${surveyData.questionCount}</p>
+    </div>
+  `;
+
+  // Append the survey card to the div
+  divInsertSurvey.appendChild(surveyCard);
+}
+
+// Example usage: Call this function after creating a survey
+// Not fully functional yet. "Cannot read properties of null (reading 'addEventListener') at student.js:279:41"
+// Comment this function out to see contents of Group List because this hides them.
+// document.getElementById('formAddSurvey').addEventListener('submit', function (event) {
+//   event.preventDefault();
+
+//   // Get form values
+//   const surveyData = {
+//     title: document.getElementById('surveyTitle').value,
+//     recipientGroup: document.getElementById('surveyRecipientGroup').value,
+//     dueDate: document.getElementById('surveyDueDate').value,
+//     facultyReview: document.getElementById('txtFacultyReviewRequirement').value,
+//     questionCount: document.getElementById('txtSurveyQuestionCount').value
+//   };
+
+//   // Populate the survey in the div
+//   populateIncomingSurvey(surveyData);
+
+//   // Optionally, clear the form after submission
+//   document.getElementById('formAddSurvey').reset();
+// });
+
+// Not fully functional yet, but should populate the "Select Recipient" dropdown with group members.
+function populateSurveyRecipientDropdown() {
+  const surveyRecipientDropdown = document.getElementById('surveyRecipient');
+  surveyRecipientDropdown.innerHTML = '<option value="" selected hidden>Select recipient</option>'; // Clear existing options
+
+  for (const [groupID, groupData] of Object.entries(groupDataMap)) {
+    for (const memberID of groupData.members) {
+      const user = userMap[memberID];
+      if (user) {
+        const option = document.createElement('option');
+        option.value = memberID;
+        option.textContent = `${user.firstName} ${user.lastName} (${groupID})`;
+        surveyRecipientDropdown.appendChild(option);
+      }
+    }
+  }
+}
+
+// Call this function after the dashboard is initialized
+initializeDashboard().then(() => {
+  populateSurveyRecipientDropdown();
+});
