@@ -200,25 +200,65 @@ app.post('/user', (req, res, next) => {
       }
     })
   } else {
-    return res.status(400).json({ "message": "Invalid Argument" })
+    return res.status(400).json({ "message": "Invalid Arguments" })
   }
 })
 
 // Update user
 // PUT /user
-// with body.email body.newPasswordHash body.firstName body.lastName body.title body.phoneNumber body.otherContacts
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
 app.put('/user', validateSession, (req, res, next) => {
   // TODO add actual validation and user update
-  if (req.body.email && req.body.newPassword && req.body.firstName && req.body.lastName && req.body.title && req.body.phoneNumber && req.body.otherContacts) {
-    res.status(201).json({})
+  if (req.body.email && req.body.password && req.body.firstName && req.body.middleInitial && req.body.lastName && req.body.bio) {
+    strSqlQuery = "UPDATE tblUsers SET Email=?, Password=?, FirstName=?, LastName=?, MiddleInitial=?, Bio=? WHERE tblUsers.UserID = (SELECT tblUsers.UserID from tblUsers LEFT JOIN tblSessions ON tblUsers.UserID = tblSessions.UserID WHERE tblSessions.SessionID = ?);"
+    arrParams = [
+        req.body.email,
+        req.body.password,
+        req.body.firstName,
+        req.body.lastName,
+        req.body.middleInitial,
+        req.body.bio,
+        req.cookies.SESSION_ID
+    ]
+
+    db.run(strSqlQuery, arrParams, (err) => {
+        if (err)
+        {
+            return res.status(500).json({
+                message: err.message
+            })
+        }
+        else
+        {
+            return res.status(201).json({
+                message: "User updated!"
+            })
+        }
+    })
   } else {
-    res.status(400).json({})
+    return res.status(400).json({
+            message: "Invalid Parameters"
+        })
   }
 })
+/*
+    fetch('http://peermetric.com:1025/user', {
+        method: "PUT",
+        headers: {"Content-Type": "Application/JSON"},
+        credentials: "include",
+        body: JSON.stringify({
+            "email": "jdoe@example.com",
+            "password": "Cats",
+            "firstName": "John",
+            "lastName": "Doe",
+            "middleInitial": "R",
+            "bio": "I like cats",
+        })
+    })
+*/
 
 // Read user
 // GET /user
