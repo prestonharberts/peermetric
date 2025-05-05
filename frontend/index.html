@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- PAGE TITLE -->
-  <title>RateMyTeam</title>
+  <title>Peermetric</title>
   <!-- SITE ICON -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <!-- CSS STYLESHEETS -->
@@ -17,7 +17,7 @@
       background-image: url("./img/wallpaper.webp");
       background-repeat: no-repeat;
       background-size: cover;
-      background-color: rgba(0, 20, 100, 0.5);
+      background-color: rgba(0, 40, 255, 0.3);
       /* semi-transparent black overlay */
       background-blend-mode: overlay;
     }
@@ -30,35 +30,35 @@
   <div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center py-7" style="padding-top: 5rem; padding-bottom: 5rem;">
     <form class="card col-12 col-md-5 col-lg-4" id="frmLogin">
       <div class="card-body">
-        <h1 class="text-center mb-0 text-primary">RateMyTeam</h1>
-        <h3 class="text-center mt-3 mb-0 text-dark">Team Management Solution</h3>
+        <h1 class="text-center mb-0 fw-light">Peermetric</h1>
+        <h3 class="text-center mt-3 opacity-50 mb-0 text-dark">Team Management Solution</h3>
         <div class="d-flex justify-content-center">
           <!-- IMAGE -->
-          <img src="./img/school-svgrepo.svg" alt="computer monitor image" style="max-width: 80%;" class="mt-2 mb-2">
+          <img src="./img/peermetric.png" alt="computer monitor image" style="max-width: 25%;" class="mt-3 mb-3">
         </div>
         <!-- LOGIN DETAILS -->
-        <h4 class="text-center mb-0 text-dark">Account Login</h4>
-        <select id="txtLoginType" class="form-control mt-4" aria-label="select login type">
+        <h4 class="text-center text-dark"><b>Account Login</b></h4>
+        <select id="txtLoginType" class="form-control mt-3" aria-label="select login type">
           <option value="Student login" selected>Student login</option>
           <option value="Faculty login">Faculty login</option>
         </select>
         <input id="txtEmailLogin" class="form-control mt-2" type="email" placeholder="Email" aria-label="email input" autocomplete="username">
         <input id="txtPasswordLogin" class="form-control mt-2" type="password" placeholder="Password" aria-label="password input" autocomplete="current-password">
         <button class="btn btn-primary col-12 mt-4" type="button" id="btnLogin">Log In</button>
-        <button class="btn btn-link col-12 mt-4" type="button" id="btnSwapLogin">Need an account? Create one</button>
+        <button class="btn btn-link col-12 mt-2" type="button" id="btnSwapLogin">Need an account? Create one</button>
       </div>
     </form>
     <!-- REGISTER CARD -->
     <form class="card col-12 col-md-5 col-lg-4" id="frmRegister" style="display: none;">
       <div class="card-body">
-        <h1 class="text-center mb-0 text-primary">RateMyTeam</h1>
-        <h3 class="text-center mt-3 mb-0 text-dark">Team Management Solution</h3>
+        <h1 class="text-center mb-0 fw-light">Peermetric</h1>
+        <h3 class="text-center mt-3 opacity-50 mb-0 text-dark">Team Management Solution</h3>
         <div class="d-flex justify-content-center">
           <!-- IMAGE -->
-          <img src="./img/school-svgrepo.svg" alt="computer monitor image" style="max-width: 80%;" class="mt-2 mb-2">
+          <img src="./img/peermetric.png" alt="computer monitor image" style="max-width: 25%;" class="mt-3 mb-3">
         </div>
         <!-- REGISTER DETAILS -->
-        <h4 class="text-center mb-4 text-dark">Create Account</h4>
+        <h4 class="text-center mb-3 text-dark"><b>Create Account</b></h4>
         <h5 class="text-dark">Account Information</h5>
         <select id="txtRegisterType" class="form-control mt-2" aria-label="select register type">
           <option value="Student account" selected>Student account</option>
@@ -67,7 +67,7 @@
         <input id="txtEmailRegister" class="form-control mt-2" type="email" placeholder="Email" aria-label="email input required" autocomplete="off">
         <input id="txtPasswordRegister" class="form-control mt-2" type="password" placeholder="Password" aria-label="password input required" autocomplete="off">
         <input id="txtPasswordConfirm" class="form-control mt-2" type="password" placeholder="Confirm Password" aria-label="confirm password input required" autocomplete="off">
-        <p class="mt-2 text-secondary">Requirements: at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters</p>
+        <p class="mt-2 opacity-75">Requirements: at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters</p>
         <h5 class="mt-4 text-dark">Personal Information</h5>
         <input id="txtFirstName" class="form-control mt-2" placeholder="First Name" aria-label="first name input required">
         <input id="txtMiddleInitial" class="form-control mt-2" placeholder="Middle Initial (optional)" aria-label="middle initial input optional">
@@ -75,9 +75,9 @@
         <input id="txtPreferredName" class="form-control mt-2" placeholder="Preferred Name (optional)" aria-label="preferred name input optional">
         <h5 class="mt-4 text-dark">Contact Information <span class="opacity-50">(optional)</span></h5>
         <input id="txtPhone" class="form-control mt-2" pattern="\(\d{3}\) \d{3}-\d{4}" type="tel" placeholder="Phone" aria-label="phone input optional">
-        <input id="txtDiscord" class="form-control mt-2 mb-4" placeholder="Discord" aria-label="discord input optional">
+        <input id="txtDiscord" class="form-control mt-2" placeholder="Discord" aria-label="discord input optional">
         <button class="btn btn-primary col-12 mt-4" type="button" id="btnRegister">Register</button>
-        <button class="btn btn-link col-12 mt-4" type="button" id="btnSwapRegister">Already have an account? Sign in</button>
+        <button class="btn btn-link col-12 mt-2" type="button" id="btnSwapRegister">Already have an account? Sign in</button>
       </div>
     </form>
   </div>
