@@ -1751,18 +1751,94 @@ app.delete('/reviewSpec/:reviewSpecId', validateSession, async (req, res, next) 
 // RESPONSE //
 
 // Create response
-// POST /group/{groupId}/response/
-// with body.reviewSpecId body.reviewerId body.targetId body.publicFeedback body.privateFeedback
+// POST /group/{groupId}/response/{reviewSpecId}
+// with body.targetId body.publicFeedback body.privateFeedback
 // with cookie SESSION_ID
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
+// Returns 409 Conflict if the response already exists
 // Returns 400 Bad Request otherwise
-app.post('/group/:groupId/response', validateSession, (req, res, next) => {
-  // TODO add actual validation and response creation
-  if (req.params.groupId && req.body.reviewSpecId && req.body.reviewerId && req.body.targetId && req.body.publicFeedback && req.body.privateFeedback) {
-    res.status(201).json({ responseId: "responseId" })
-  } else {
+app.post('/group/:groupId/response/:reviewSpecId', validateSession, async (req, res, next) => {
+  // Validate params
+  if(!regexUUID.test(req.params.groupId) || !regexUUID.test(req.params.reviewSpecId) || !regexUUID.test(req.body.targetId) || !req.body.publicFeedback || !req.body.privateFeedback) {
     res.status(400).json({})
+    return
+  }
+  let objError = null
+
+  // Check if the group exists
+  let resultGroup = null
+  let strCommand = `SELECT * FROM tblGroups WHERE GroupID = ?`
+  await db.get(strCommand, [req.params.groupId], function(error, result) {
+    objError = error
+    resultGroup = result
+  })
+  if(objError) {
+    console.error("DB error searching groups: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultGroup == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if the review spec exists
+  let resultReviewSpec = null
+  strCommand = `SELECT * FROM tblReviewSpecifications WHERE ReviewSpecID = ?`
+  await db.get(strCommand, [req.params.reviewSpecId], function(error, result) {
+    objError = error
+    resultReviewSpec = result
+  })
+  if(objError) {
+    console.error("DB error searching review specs: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultReviewSpec == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if any reviews of the same spec by the same author for the same target in the same group exist
+  let resultSession = null
+  let resultResponse = null
+  strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(401).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblResponses WHERE GroupID = ? AND ReviewSpecID = ? AND ReviewerID = ? AND TargetID = ?`
+  await db.get(strCommand, [req.params.groupId, req.params.reviewSpecId, resultSession.UserID, req.body.targetId], function(error, result) {
+    objError = error
+    resultResponse = result
+  })
+  if(objError) {
+    console.error("DB error searching responses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultResponse != null) {
+    res.status(409).json({})
+    return
+  }
+
+  // Create the response
+  let strResponseId = uuidv4()
+  strCommand = `INSERT INTO tblResponses (ResponseID, GroupID, ReviewSpecID, ReviewerID, TargetID, PublicFeedback, PrivateFeedback) VALUES (?, ?, ?, ?, ?, ?, ?)`
+  await db.run(strCommand, [strResponseId, req.params.groupId, req.params.reviewSpecId, resultSession.UserID, req.body.targetId, req.body.publicFeedback, req.body.privateFeedback], function(error) {
+    objError = error
+  })
+  if(objError) {
+    console.error("DB error creating response: \n\t" + objError)
+    res.status(500).json({})
+    return
   }
 })
 
