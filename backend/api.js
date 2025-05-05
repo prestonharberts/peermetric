@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt')
 const cookieParser = require('cookie-parser')
 const sqlite3 = require('sqlite3').verbose()
 
+const intTimeout = 50
 const PORT = 1025
 const regexUUID = /[0-9A-Za-z]{8}-[0-9A-Za-z]{4}-4[0-9A-Za-z]{3}-[89ABab][0-9A-Za-z]{3}-[0-9A-Za-z]{12}/
 
@@ -97,6 +98,7 @@ app.post('/session', (req, res, next) => {
                 return
               }
             })
+            await new Promise(r => setTimeout(r, intTimeout))
             res.cookie('SESSION_ID', strSessionId, {
               httpOnly: true,
               expires: new Date(unixtimeExpireTime), //12 hours
@@ -582,36 +584,37 @@ app.put('/course/:courseId', validateSession, (req, res, next) => {
 // }
 app.get('/course/:courseId', validateSession, async (req, res, next) => {
   // v A l I d A t E
-  if(regexUUID.test(req.params.courseId)) {
+  if(!regexUUID.test(req.params.courseId)) {
     res.status(400).json({})
   }
   let objError = null
 
-  // Check if the course is owned by or accessible to the current user
+  // Check if the current user is the owner of the course or a student in the course
   let resultSession = null
   let resultCourse = null
   let resultStudent = null
-  let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+  let strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
   await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
     objError = error
     resultSession = result
   })
+  await new Promise(r => setTimeout(r, intTimeout))
   if(objError) {
     // Cringe
     console.error("DB error searching sessions: \n\t" + error)
     res.status(500).json({})
     return
   } else if(resultSession == null) {
-    res.status(404).json({})
+    res.status(401).json(resultSession)
     return
   }
-  const strUserId = result.UserID
 
-  strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
+  strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
   await db.get(strCommand, [req.params.courseId], function(error, result) {
     objError = error
     resultCourse = result
   })
+  await new Promise(r => setTimeout(r, intTimeout))
   if(objError) {
     console.error("DB error searching courses: \n\t" + error)
     res.status(500).json({})
@@ -622,71 +625,66 @@ app.get('/course/:courseId', validateSession, async (req, res, next) => {
     return
   }
 
-  strCommand = `SELECT * FROM tblStudents WHERE CourseID = ? AND StudentID = ?`
-  await db.get(strCommand, [req.params.courseId, strUserId], function(error, result) {
+  strCommand = `SELECT * FROM tblStudents WHERE CourseID = ? AND UserID = ?`
+  await db.get(strCommand, [req.params.courseId, resultSession.UserID], function(error, result) {
     objError = error
     resultStudent = result
   })
+  await new Promise(r => setTimeout(r, intTimeout))
   if(objError) {
-    console.error("DB error searching courses: \n\t" + error)
+    console.error("DB error searching courses: \n\t" + objError)
     res.status(500).json({})
     return
-  } else if(result == null) {
+  }
+
+  if(!(resultCourse != null && resultCourse.OwnerID == resultSession.UserID) && !(resultStudent != null && resultStudent.UserID == resultSession.UserID)) {
     // Bozo is not authorized to view this course
     res.status(401).json({user: "L Red Team"})
     return
   }
+  
+  // Build the course object
+  let objCourse = {
+    ownerId: resultCourse.OwnerID,
+    courseCode: resultCourse.CourseCode,
+    friendlyName: resultCourse.CourseName,
+    groupList: [],
+    studentList: []
+  }
 
-  if(resultCourse.OwnerID != strUserId && resultStudent == null) {
-    res.status(401).json({user: "L Red Team"})
+  // Get the groups
+  let resultGroups = null
+  strCommand = `SELECT * FROM tblGroups WHERE CourseID = ?`
+  await db.all(strCommand, [req.params.courseId], function(error, result) {
+    objError = error
+    resultGroups = result
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
     return
   }
-  
-  // Compile the course object
-  let objCourse = await compileCourseObject(req.params.courseId)
+  objCourse.groupList.push(resultGroups.map(group => group.GroupID))
+
+  // Get the students
+  let resultStudents = null
+  strCommand = `SELECT * FROM tblStudents WHERE CourseID = ?`
+  await db.all(strCommand, [req.params.courseId], function(error, result) {
+    objError = error
+    resultStudents = result
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+  objCourse.studentList.push(resultStudents.map(student => student.StudentID))
+
+  // Send it off to the front lines
   res.status(200).json(objCourse)
 })
-
-async function compileCourseObject(courseId) {
-    // Compile the course object from the database result
-    let objCourse = {
-        ownerId: "",
-        courseCode: "",
-        friendlyName: "",
-        groupList: [],
-        studentList: []
-    }
-    let strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
-    await db.get(strCommand, [courseId], function(error, result) {
-        if(error) {
-            console.error("DB error searching courses: \n\t" + error)
-            return null
-        } else {
-            objCourse.ownerId = result.OwnerID
-            objCourse.courseCode = result.CourseCode
-            objCourse.friendlyName = result.FriendlyName
-        }
-    })
-    strCommand = `SELECT * FROM tblGroups WHERE CourseID = ?`
-    await db.all(strCommand, [courseId], function(error, result) {
-        if(error) {
-            console.error("DB error searching courses: \n\t" + error)
-            return null
-        } else if(result != null) {
-            objCourse.groupList.push(...result.GroupID)
-        }
-    })
-    strCommand = `SELECT * FROM tblStudents WHERE CourseID = ?`
-    await db.get(strCommand, [courseId], function(error, result) {
-        if(error) {
-            console.error("DB error searching courses: \n\t" + error)
-            return null
-        } else if(result != null) {
-            objCourse.studentList.push(...result.UserID)
-        }
-    })
-    return objCourse
-}
 
 // Read all courses
 // GET /courses
@@ -745,6 +743,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                                 return
                             }
                         })
+                        await new Promise(r => setTimeout(r, intTimeout))
                         // Delete all review specifications related to the course
                         strCommand = `DELETE FROM tblReviewSpecs WHERE CourseID = ?`
                         await db.run(strCommand, [req.params.courseId], function(error) {
@@ -754,6 +753,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                                 return
                             }
                         })
+                        await new Promise(r => setTimeout(r, intTimeout))
                         // Delete every students' relationship to the course
                         strCommand = `DELETE FROM tblStudents WHERE CourseID = ?`
                         await db.run(strCommand, [req.params.courseId], function(error) {
@@ -763,6 +763,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                                 return
                             }
                         })
+                        await new Promise(r => setTimeout(r, intTimeout))
                         // Delete all groups related to the course
                         strCommand = `DELETE FROM tblGroups WHERE CourseID = ?`
                         await db.run(strCommand, [req.params.courseId], function(error) {
@@ -772,6 +773,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                                 return
                             }
                         })
+                        await new Promise(r => setTimeout(r, intTimeout))
                         // Delete the course
                         strCommand = `DELETE FROM tblCourses WHERE CourseID = ?`
                         await db.run(strCommand, [req.params.courseId], function(error) {
@@ -1121,7 +1123,7 @@ app.get('/group/:groupId', validateSession, (req, res, next) => {
     res.status(500).json({})
     return
   }
-  objGroup.groupMembers.push(...resultGroupMembers)
+  objGroup.groupMembers.push(resultGroupMembers.map(member => member.StudentID))
 
   // Return the group object
   return objGroup
