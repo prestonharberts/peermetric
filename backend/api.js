@@ -1260,11 +1260,8 @@ app.post('/group/:groupId/student/:studentId', validateSession, async (req, res,
     objError = error
     resultCourse = result
   })
-  if(objError) {
+  if(objError || resultCourse == null) {
     console.error("DB error searching courses: \n\t" + objError)
-    res.status(500).json({})
-    return
-  } else if(resultCourse == null) {
     res.status(500).json({})
     return
   }
@@ -1321,12 +1318,90 @@ app.get('/students', validateSession, (req, res) => {
 // Returns 201 Created if successfully removed
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.delete('/group/:groupId/student/:studentId', validateSession, (req, res, next) => {
-  // TODO add actual validation and remove student from group
-  if (req.params.groupId && req.params.studentId) {
-    res.status(201).json({})
-  } else {
+app.delete('/group/:groupId/student/:studentId', validateSession, async (req, res, next) => {
+  // Validate params
+  if(!regexUUID.test(req.params.groupId) || !regexUUID.test(req.params.studentId)) {
     res.status(400).json({})
+    return
+  }
+  let objError = null
+
+  // Check if the group exists
+  let resultGroup = null
+  let strCommand = `SELECT * FROM tblGroups WHERE GroupID = ?`
+  await db.get(strCommand, [req.params.groupId], function(error, result) {
+    objError = error
+    resultGroup = result
+  })
+  if(objError) {
+    console.error("DB error searching groups: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultGroup == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if the target student exists
+  let resultTargetStudent = null
+  strCommand = `SELECT * FROM tblUsers WHERE UserID = ? AND GroupID = ?`
+  await db.get(strCommand, [req.params.studentId, req.params.groupId], function(error, result) {
+    objError = error
+    resultTargetStudent = result
+  })
+  if(objError) {
+    console.error("DB error searching users: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultTargetStudent == null) {
+    res.status(404).json({})
+    return
+  }
+
+  // Check if the current user is the owner of the course or is the target student
+  let resultSession = null
+  let resultCourse = null
+  strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(401).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [resultGroup.CourseID], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  if(objError || resultCourse == null) {
+    console.error("DB error searching courses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  if(resultSession.UserID != resultCourse.OwnerID && resultSession.UserID != resultTargetStudent.UserID) {
+    res.status(401).json({})
+    return
+  }
+
+  // It's...removing time
+  strCommand = `UPDATE tblStudents SET GroupID = NULL WHERE UserID = ?`
+  await db.run(strCommand, [req.params.studentId], function(error) {
+    objError = error
+  })
+  if(objError) {
+    console.error("DB error removing student from group: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else {
+    res.status(201).json({})
   }
 })
 
