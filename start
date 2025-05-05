@@ -11,7 +11,7 @@ CREATE TABLE tblCourses (
   CourseID TEXT NOT NULL,
   CourseCode TEXT NOT NULL,
   CourseName TEXT NOT NULL,
-  InstructorID TEXT NOT NULL,
+  OwnerID TEXT NOT NULL,
   PRIMARY KEY (CourseID)
 );
 

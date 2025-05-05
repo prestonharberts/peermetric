@@ -70,49 +70,49 @@ function validateSession(req, res, next) {
 // Returns 401 Unauthorized if unable to authenticate
 // Returns 400 Bad REquest if the session already exists
 app.post('/session', (req, res, next) => {
-    // Make sure they don't already have a session cookie
-    if(req.cookies.SESSION_ID != null) {
-        res.clearCookie('SESSION_ID')
-    }
-    // Validate that the email and password are not empty
-    if(req.body.email != null && req.body.password != null) {
-        // Check the database for the credentials
-        let strCommand = `SELECT * FROM tblUsers WHERE Email = ?`
-        db.all(strCommand, [req.body.email], async function(error, result){
-            if(error) {
-                console.error("DB error searching users: \n\t" + error)
+  // Make sure they don't already have a session cookie
+  if(req.cookies.SESSION_ID != null) {
+    res.clearCookie('SESSION_ID')
+  }
+  // Validate that the email and password are not empty
+  if(req.body.email != null && req.body.password != null) {
+    // Check the database for the credentials
+    let strCommand = `SELECT * FROM tblUsers WHERE Email = ?`
+    db.all(strCommand, [req.body.email], async function(error, result){
+      if(error) {
+        console.error("DB error searching users: \n\t" + error)
+        res.status(500).json({})
+      } else{
+        // Check each matching email to see if the password matches
+        for(let i = 0; i < result.length; i++) {
+          if(bcrypt.compareSync(req.body.password, result[i].Password)) {
+            // Create the session
+            let strCommand = `INSERT INTO tblSessions (SessionID, UserID, ExpiryDate) VALUES (?, ?, ?)`
+            let strSessionId = uuidv4()
+            let unixtimeExpireTime = Date.now() + 12 * 60 * 60 * 1000 //12 hours
+            await db.run(strCommand, [strSessionId, result[i].UserID, unixtimeExpireTime], function(error) {
+              if(error) {
+                console.error("DB error creating session: \n\t" + error)
                 res.status(500).json({})
-            } else{
-                // Check each matching email to see if the password matches
-                for(let i = 0; i < result.length; i++) {
-                    if(bcrypt.compareSync(req.body.password, result[i].Password)) {
-                        // Create the session
-                        let strCommand = `INSERT INTO tblSessions (SessionID, UserID, ExpiryDate) VALUES (?, ?, ?)`
-                        let strSessionId = uuidv4()
-                        let unixtimeExpireTime = Date.now() + 12 * 60 * 60 * 1000 //12 hours
-                        await db.run(strCommand, [strSessionId, result[i].UserID, unixtimeExpireTime], function(error) {
-                            if(error) {
-                                console.error("DB error creating session: \n\t" + error)
-                                res.status(500).json({})
-                                return
-                            }
-                        })
-                        res.cookie('SESSION_ID', strSessionId, {
-                            httpOnly: true,
-                            expires: new Date(unixtimeExpireTime), //12 hours
-                            sameSite: 'Strict',
-                            secure: false // Set to true with HTTPS
-                        }).status(201).json({})
-                        return
-                    }
-                }
-                // No password matched :(
-                res.status(401).json({})
-            }
-        })
-    } else {
-      res.status(401).json({})
-    }
+                return
+              }
+            })
+            res.cookie('SESSION_ID', strSessionId, {
+              httpOnly: true,
+              expires: new Date(unixtimeExpireTime), //12 hours
+              sameSite: 'Strict',
+              secure: false // Set to true with HTTPS
+            }).status(201).json({})
+            return
+          }
+        }
+        // No password matched :(
+        res.status(401).json({})
+      }
+    })
+  } else {
+    res.status(401).json({})
+  }
 })
 
 // Delete session
@@ -421,7 +421,7 @@ app.delete('/user', validateSession, (req, res, next) => {
   })
 })
 
-app.delete('/user/byEmail/', validateSession, (req, res, next) => {
+app.delete('/user/byEmail/:email', validateSession, (req, res, next) => {
   strSqlQuery = "DELETE FROM tblUsers WHERE tblUsers.Email = ?;"
   strSqlParam = req.params.email
 
@@ -440,6 +440,7 @@ app.delete('/user/byEmail/', validateSession, (req, res, next) => {
     }
   })
 })
+
 // COURSE //
 
 // Create course
@@ -463,7 +464,7 @@ app.post('/course', validateSession, (req, res, next) => {
         res.status(500).json({})
       } else {
         // Toss the info in the db
-        let strCommand = `INSERT INTO tblCourses (CourseID, CourseCode, FriendlyName, OwnerID)`
+        let strCommand = `INSERT INTO tblCourses (CourseID, CourseCode, CourseName, OwnerID) VALUES (?, ?, ?, ?)`
         let strCourseId = uuidv4()
         db.run(strCommand, [strCourseId, req.body.courseCode, req.body.friendlyName, result.UserID], function(error) {
           if (error) {
@@ -513,7 +514,7 @@ app.put('/course/:courseId', validateSession, (req, res, next) => {
             // Womp womp
             res.status(404).json({})
             return
-          } else if (result.OwnerID != strUserId) {
+          } else if (result.OwnerID == strUserId) {
             // Toss the info in the db
             let strCommand = `UPDATE tblCourses SET CourseCode = ?, CourseName = ? WHERE CourseID = ?`
             db.run(strCommand, [req.body.courseCode, req.body.friendlyName, req.params.courseId], function(error) {
@@ -557,84 +558,71 @@ app.put('/course/:courseId', validateSession, (req, res, next) => {
 //     "studentId1"
 //   ]
 // }
-app.get('/course/:courseId', validateSession, (req, res, next) => {
-    // v A l I d A t E
-    if(regexUUID.test(req.params.courseId)) {
-        // TODO validate courseId and get course
-        res.status(200).json({
-            ownerId: "ownerId",
-            courseCode: "CSC 3100-001",
-            friendlyName: "Web Dev",
-            groupList: [
-                "groupId0",
-                "groupId1"
-            ],
-            studentList: [
-                "studentId0",
-                "studentId1"
-            ]
-        })
-        // Check if the course is owned by or accessible to the current user
-        let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
-        db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
-            if(error) {
-                // Cringe
-                console.error("DB error searching sessions: \n\t" + error)
-                res.status(500).json({})
-                return
-            } else {
-                const strUserId = result.UserID
-                // User is owner of course?
-                let strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
-                db.get(strCommand, [req.params.courseID], function(error, result) {
-                    if(error) {
-                        console.error("DB error searching courses: \n\t" + error)
-                        res.status(500).json({})
-                        return
-                    } else if(result.OwnerID == strUserId) {
-                        // User owns the course
-                        let objCourse = compileCourseObject(req.params.courseId)
-                        if(objCourse == null) {
-                            // Error
-                            res.status(500).json({})
-                            return
-                        } else {
-                            res.status(200).json(compileCourseObject(req.params.courseId))
-                            return
-                        }
-                    } else {
-                        // User is student in course?
-                        strCommand = `SELECT * FROM tblStudents WHERE CourseID = ? AND StudentID = ?`
-                        db.get(strCommand, [req.params.courseId, strUserId], function(error, result) {
-                            if(error) {
-                                console.error("DB error searching courses: \n\t" + error)
-                                res.status(500).json({})
-                                return
-                            } else if(result != null) {
-                                // User is student
-                                let objCourse = compileCourseObject(req.params.courseId)
-                                if(objCourse == null) {
-                                    // Error
-                                    res.status(500).json({})
-                                    return
-                                } else {
-                                    res.status(200).json(compileCourseObject(req.params.courseId))
-                                    return
-                                }
-                            } else {
-                                // Bozo is not authorized to view this course
-                                res.status(401).json({user: "L Red Team"})
-                                return
-                            }
-                        })
-                    }
-                })
-                
-            }
-        })
-    } else {
-        res.status(400).json({})
-    }
+app.get('/course/:courseId', validateSession, async (req, res, next) => {
+  // v A l I d A t E
+  if(regexUUID.test(req.params.courseId)) {
+    res.status(400).json({})
+  }
+  let objError = null
+
+  // Check if the course is owned by or accessible to the current user
+  let resultSession = null
+  let resultCourse = null
+  let resultStudent = null
+  let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  if(objError) {
+    // Cringe
+    console.error("DB error searching sessions: \n\t" + error)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(404).json({})
+    return
+  }
+  const strUserId = result.UserID
+
+  strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [req.params.courseId], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  if(objError) {
+    console.error("DB error searching courses: \n\t" + error)
+    res.status(500).json({})
+    return
+  } else if(resultCourse == null) {
+    // Course not found
+    res.status(404).json({})
+    return
+  }
+
+  strCommand = `SELECT * FROM tblStudents WHERE CourseID = ? AND StudentID = ?`
+  await db.get(strCommand, [req.params.courseId, strUserId], function(error, result) {
+    objError = error
+    resultStudent = result
+  })
+  if(objError) {
+    console.error("DB error searching courses: \n\t" + error)
+    res.status(500).json({})
+    return
+  } else if(result == null) {
+    // Bozo is not authorized to view this course
+    res.status(401).json({user: "L Red Team"})
+    return
+  }
+
+  if(resultCourse.OwnerID != strUserId && resultStudent == null) {
+    res.status(401).json({user: "L Red Team"})
+    return
+  }
+  
+  // Compile the course object
+  let objCourse = await compileCourseObject(req.params.courseId)
+  res.status(200).json(objCourse)
 })
 
 async function compileCourseObject(courseId) {

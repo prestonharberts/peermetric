@@ -4,7 +4,7 @@ CREATE TABLE `tblCourses` (
   `CourseID` text NOT NULL,
   `CourseCode` text NOT NULL,
   `CourseName` text NOT NULL,
-  `InstructorID` text NOT NULL,
+  `OwnerID` text NOT NULL,
   PRIMARY KEY (`CourseID`)
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE `tblStudents` (
   FOREIGN KEY (`UserID`) REFERENCES `tblUsers`(`UserID`),
   FOREIGN KEY (`CourseID`) REFERENCES `tblCourses`(`CourseID`),
   FOREIGN KEY (`GroupID`) REFERENCES `tblGroups` (`GroupID`),
-  Primary Key (`UserID`, `CourseCode`)
+  Primary Key (`UserID`, `CourseID`)
 );
 
 CREATE TABLE `tblResponses` (
