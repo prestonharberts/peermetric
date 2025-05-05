@@ -266,16 +266,22 @@
   </div>
 
   <footer class="bg-transparent text-dark fixed-bottom">
-    <div class="container-fluid d-flex justify-content-center align-items-center" style="height: 50px;">
-      <small class="text-center">
+    <div class="container-fluid d-flex justify-content-start align-items-center position-relative" style="height: 50px;">
+
+      <!-- Left-aligned Click Me Button -->
+      <button id="clickMeButton" class="btn btn-link text-decoration-none text-dark me-auto">
+        <b>Click Me!</b>
+      </button>
+
+      <!-- Centered absolutely in the viewport -->
+      <small class="position-absolute start-50 translate-middle-x text-center">
         © 2025
         <a class="text-decoration-none" href="https://github.com/prestonharberts/peermetric">Peermetric (GitHub)</a>
         <span>CC BY 4.0</span>
       </small>
+
     </div>
   </footer>
-
-
 
   <!-- JS SCRIPTS -->
   <script src="js/lib/bootstrap.bundle.min.js"></script>
@@ -296,6 +302,18 @@
       sessionStorage.clear();
       window.location.href = 'index.html';
     });
+
+    // Add event listener for the left-aligned "Click Me" button
+
+    document.getElementById('clickMeButton').addEventListener('click', function () {
+      Swal.fire({
+        title: 'CSC 3100 - Final Project',
+        text: 'Faculty Page (Preston): Here on this page is an assortment of useful tools such as creating surveys, groups, and courses. Eventually there will be management tools for each of them. Behind the scenes, JavaScript is used to handle the data and display it very nicely with links on each item in case I get to implementing modals. I use Trevor and Rivers\' API routes to fetch data from the SQLite3 database and do operations on them such as calculating estimated number of surveys remaining per course or group, filtering out who belongs where, and whether they belong to the user or not.',
+        icon: 'info',
+        confirmButtonText: 'OK'
+      });
+    });
+
   </script>
 </body>
 
