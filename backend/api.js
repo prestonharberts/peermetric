@@ -705,93 +705,113 @@ app.get('/courses', validateSession, (req, res) => {
 // Returns 201 Created if successfully deleted
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.delete('/course/:courseId', validateSession, (req, res, next) => {
-    // validate courseId
-    if(regexUUID.test(req.params.courseId)) {
-        res.status(201).json({})
-        // Validate permission
-        let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
-        db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
-            if(error) {
-                console.error("DB error searching sessions: \n\t" + error)
-                res.status(500).json({})
-            } else {
-                const strUserId = result.UserID
-                // You know the rules, and so do I
-                // Authentication's what I'm thinking of
-                // You wouldn't get this from any API
-                let strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
-                db.get(strCommand, [req.params.courseId], async function(error, result) {
-                    if(error) {
-                        console.error("DB error searching course: \n\t" + error)
-                        res.status(500).json({})
-                    } else if(result == null) {
-                        // Course not found
-                        res.status(404).json({})
-                    } else if(result.OwnerID != strUserId) {
-                        // Unauthorized
-                        res.status(401).json({})
-                    } else {
-                        // This could've been "callback hell"
+app.delete('/course/:courseId', validateSession, async (req, res, next) => {
+  // validate courseId
+  if(!regexUUID.test(req.params.courseId)) {
+    res.status(400).json({})
+    return
+  }
+  objError = null
 
-                        // Delete all responses related to the course
-                        let strCommand = `DELETE FROM tblResponses WHERE ReviewSpecID IN (SELECT ReviewSpecID FROM tlbReviewSpecs WHERE CourseID = ?)`
-                        await db.run(strCommand, [req.params.courseId], function(error) {
-                            if(error) {
-                                console.error("DB error deleting responses: \n\t" + error)
-                                res.status(500).json({})
-                                return
-                            }
-                        })
-                        await new Promise(r => setTimeout(r, intTimeout))
-                        // Delete all review specifications related to the course
-                        strCommand = `DELETE FROM tblReviewSpecs WHERE CourseID = ?`
-                        await db.run(strCommand, [req.params.courseId], function(error) {
-                            if(error) {
-                                console.error("DB error deleting review specs: \n\t" + error)
-                                res.status(500).json({})
-                                return
-                            }
-                        })
-                        await new Promise(r => setTimeout(r, intTimeout))
-                        // Delete every students' relationship to the course
-                        strCommand = `DELETE FROM tblStudents WHERE CourseID = ?`
-                        await db.run(strCommand, [req.params.courseId], function(error) {
-                            if(error) {
-                                console.error("DB error deleting course: \n\t" + error)
-                                res.status(500).json({})
-                                return
-                            }
-                        })
-                        await new Promise(r => setTimeout(r, intTimeout))
-                        // Delete all groups related to the course
-                        strCommand = `DELETE FROM tblGroups WHERE CourseID = ?`
-                        await db.run(strCommand, [req.params.courseId], function(error) {
-                            if(error) {
-                                console.error("DB error deleting course: \n\t" + error)
-                                res.status(500).json({})
-                                return
-                            }
-                        })
-                        await new Promise(r => setTimeout(r, intTimeout))
-                        // Delete the course
-                        strCommand = `DELETE FROM tblCourses WHERE CourseID = ?`
-                        await db.run(strCommand, [req.params.courseId], function(error) {
-                            if(error) {
-                                console.error("DB error deleting course: \n\t" + error)
-                                res.status(500).json({})
-                                return
-                            } else {
-                                res.status(201).json({})
-                            }
-                        })
-                    }
-                })
-            }
-        })
-    } else {
-        res.status(400).json({})
-    }
+  // Validate permission
+  let resultSession = null
+  let resultCourse = null
+  let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
+  await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    objError = error
+    resultSession = result
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error searching sessions: \n\t" + objError)
+    res.status(500).json({})
+    return
+  } else if(resultSession == null) {
+    res.status(401).json({})
+    return
+  }
+
+  // You know the rules, and so do I
+  // Authentication's what I'm thinking of
+  // You wouldn't get this from any API
+  strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+  await db.get(strCommand, [req.params.courseId], function(error, result) {
+    objError = error
+    resultCourse = result
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error searching course: \n\t" + objError)
+    res.status(500).json({})
+  } else if(resultSession == null) {
+    // Course not found
+    res.status(404).json({})
+  } else if(resultCourse.OwnerID != resultSession.UserID) {
+    // Unauthorized
+    res.status(401).json({})
+  }
+
+  // Delete all responses related to the course
+  let resultResponses = null
+  strCommand = `DELETE FROM tblResponses WHERE ReviewSpecID IN (SELECT ReviewSpecID FROM tblReviewSpecifications WHERE CourseID = ?)`
+  await db.run(strCommand, [req.params.courseId], function(error) {
+    objError = error
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error deleting responses: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  // Delete all review specifications related to the course
+  strCommand = `DELETE FROM tblReviewSpecifications WHERE CourseID = ?`
+  await db.run(strCommand, [req.params.courseId], function(error) {
+    objError = error
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error deleting review specs: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  // Delete every students' relationship to the course
+  strCommand = `DELETE FROM tblStudents WHERE CourseID = ?`
+  await db.run(strCommand, [req.params.courseId], function(error) {
+    objError = error
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error removing students from course: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  // Delete all groups related to the course
+  strCommand = `DELETE FROM tblGroups WHERE CourseID = ?`
+  await db.run(strCommand, [req.params.courseId], function(error) {
+    objError = error
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error deleting course: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+
+  // Delete the course
+  strCommand = `DELETE FROM tblCourses WHERE CourseID = ?`
+  await db.run(strCommand, [req.params.courseId], function(error) {
+    objError = error
+  })
+  await new Promise(r => setTimeout(r, intTimeout))
+  if(objError) {
+    console.error("DB error deleting course: \n\t" + objError)
+    res.status(500).json({})
+    return
+  }
+  res.status(201).json({})
 })
 
 // Add student to course
