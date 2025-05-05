@@ -79,7 +79,7 @@ app.post('/session', (req, res, next) => {
     if(req.body.email != null && req.body.password != null) {
         // Check the database for the credentials
         let strCommand = `SELECT * FROM tblUsers WHERE Email = ?`
-        db.all(strCommand, [req.body.email], function(error, result){
+        db.all(strCommand, [req.body.email], async function(error, result){
             if(error) {
                 console.error("DB error searching users: \n\t" + error)
                 res.status(500).json({})
@@ -91,7 +91,7 @@ app.post('/session', (req, res, next) => {
                         let strCommand = `INSERT INTO tblSessions (SessionID, UserID, ExpiryDate) VALUES (?, ?, ?)`
                         let strSessionId = uuidv4()
                         let unixtimeExpireTime = Date.now() + 12 * 60 * 60 * 1000 //12 hours
-                        db.run(strCommand, [strSessionId, result[i].UserID, unixtimeExpireTime], function(error) {
+                        await db.run(strCommand, [strSessionId, result[i].UserID, unixtimeExpireTime], function(error) {
                             if(error) {
                                 console.error("DB error creating session: \n\t" + error)
                                 res.status(500).json({})
@@ -124,7 +124,7 @@ app.post('/session', (req, res, next) => {
 app.delete('/session', validateSession, (req, res, next) => {
     // Delete all sessions tied to the user
     let strCommand = `SELECT UserID FROM tblSessions WHERE SessionID = ?`
-    db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+    db.get(strCommand, [req.cookies.SESSION_ID], async function(error, result) {
         if(error) {
             console.error("DB error searching sessions: \n\t" + error)
             res.status(500).json({})
@@ -134,7 +134,7 @@ app.delete('/session', validateSession, (req, res, next) => {
         } else {
             // Delete all sessions tied to the user
             strCommand = `DELETE FROM tblSessions WHERE UserID = ?`
-            db.run(strCommand, [result.UserID], function(error) {
+            await db.run(strCommand, [result.UserID], function(error) {
                 if(error) {
                     console.error("DB error deleting sessions: \n\t" + error)
                     res.status(500).json({})
@@ -612,7 +612,7 @@ app.get('/course/:courseId', validateSession, (req, res, next) => {
     }
 })
 
-function compileCourseObject(courseId) {
+async function compileCourseObject(courseId) {
     // Compile the course object from the database result
     let objCourse = {
         ownerId: "",
@@ -622,7 +622,7 @@ function compileCourseObject(courseId) {
         studentList: []
     }
     let strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
-    db.get(strCommand, [courseId], function(error, result) {
+    await db.get(strCommand, [courseId], function(error, result) {
         if(error) {
             console.error("DB error searching courses: \n\t" + error)
             return null
@@ -633,7 +633,7 @@ function compileCourseObject(courseId) {
         }
     })
     strCommand = `SELECT * FROM tblGroups WHERE CourseID = ?`
-    db.all(strCommand, [courseId], function(error, result) {
+    await db.all(strCommand, [courseId], function(error, result) {
         if(error) {
             console.error("DB error searching courses: \n\t" + error)
             return null
@@ -642,7 +642,7 @@ function compileCourseObject(courseId) {
         }
     })
     strCommand = `SELECT * FROM tblStudents WHERE CourseID = ?`
-    db.get(strCommand, [courseId], function(error, result) {
+    await db.get(strCommand, [courseId], function(error, result) {
         if(error) {
             console.error("DB error searching courses: \n\t" + error)
             return null
@@ -688,7 +688,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                 // Authentication's what I'm thinking of
                 // You wouldn't get this from any API
                 let strCommand = `SELECT OwnerID FROM tblCourses WHERE CourseID = ?`
-                db.get(strCommand, [req.params.courseId], function(error, result) {
+                db.get(strCommand, [req.params.courseId], async function(error, result) {
                     if(error) {
                         console.error("DB error searching course: \n\t" + error)
                         res.status(500).json({})
@@ -699,9 +699,11 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                         // Unauthorized
                         res.status(401).json({})
                     } else {
+                        // This could've been "callback hell"
+
                         // Delete all responses related to the course
                         let strCommand = `DELETE FROM tblResponses WHERE ReviewSpecID IN (SELECT ReviewSpecID FROM tlbReviewSpecs WHERE CourseID = ?)`
-                        db.run(strCommand, [req.params.courseId], function(error) {
+                        await db.run(strCommand, [req.params.courseId], function(error) {
                             if(error) {
                                 console.error("DB error deleting responses: \n\t" + error)
                                 res.status(500).json({})
@@ -710,7 +712,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                         })
                         // Delete all review specifications related to the course
                         strCommand = `DELETE FROM tblReviewSpecs WHERE CourseID = ?`
-                        db.run(strCommand, [req.params.courseId], function(error) {
+                        await db.run(strCommand, [req.params.courseId], function(error) {
                             if(error) {
                                 console.error("DB error deleting review specs: \n\t" + error)
                                 res.status(500).json({})
@@ -719,7 +721,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                         })
                         // Delete every students' relationship to the course
                         strCommand = `DELETE FROM tblStudents WHERE CourseID = ?`
-                        db.run(strCommand, [req.params.courseId], function(error) {
+                        await db.run(strCommand, [req.params.courseId], function(error) {
                             if(error) {
                                 console.error("DB error deleting course: \n\t" + error)
                                 res.status(500).json({})
@@ -728,7 +730,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                         })
                         // Delete all groups related to the course
                         strCommand = `DELETE FROM tblGroups WHERE CourseID = ?`
-                        db.run(strCommand, [req.params.courseId], function(error) {
+                        await db.run(strCommand, [req.params.courseId], function(error) {
                             if(error) {
                                 console.error("DB error deleting course: \n\t" + error)
                                 res.status(500).json({})
@@ -737,7 +739,7 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
                         })
                         // Delete the course
                         strCommand = `DELETE FROM tblCourses WHERE CourseID = ?`
-                        db.run(strCommand, [req.params.courseId], function(error) {
+                        await db.run(strCommand, [req.params.courseId], function(error) {
                             if(error) {
                                 console.error("DB error deleting course: \n\t" + error)
                                 res.status(500).json({})
@@ -761,10 +763,71 @@ app.delete('/course/:courseId', validateSession, (req, res, next) => {
 // Returns 201 Created if successful
 // Returns 401 Unauthorized if the session doesn't exist
 // Returns 400 Bad Request otherwise
-app.post('/course/:courseId/student/:studentId', validateSession, (req, res, next) => {
+app.post('/course/:courseId/student/:studentId', validateSession, async (req, res, next) => {
     // TODO add permission validation, actual validation, and add student to course
-    if(req.params.courseId && req.params.studentId) {
-        res.status(201).json({})
+    if(regexUUID.test(req.params.courseId) && regexUUID.test(req.params.studentId)) {
+        let objError = null
+
+        // Check if the course exists
+        let resultCourse = null
+        let strCommand = `SELECT * FROM tblCourses WHERE CourseID = ?`
+        await db.get(strCommand, [req.params.courseId], function(error, result) {
+            objError = error
+            resultCourse = result
+        })
+        if(objError) {
+            console.error("DB error searching courses: \n\t" + objError)
+            res.status(500).json({})
+            return
+        } else if(resultCourse == null) {
+            // goofy ah
+            res.status(404).json({})
+            return
+        }
+
+        // Check if the student exists
+        let resultStudent = null
+        strCommand = `SELECT * FROM tblUsers WHERE UserID = ?`
+        await db.get(strCommand, [req.params.studentId], function(error, result) {
+            objError = error
+            resultStudent = result
+        })
+        if(objError) {
+            console.error("DB error searching users: \n\t" + objError)
+            res.status(500).json({})
+            return
+        } else if(resultStudent == null) {
+            res.status(404).json({})
+            return
+        }
+
+        // Check if the current user is the owner of the course
+        let resultSession = null
+        strCommand = `SELECT * FROM tblSessions WHERE SessionID = ?`
+        await db.get(strCommand, [req.cookies.SESSION_ID], function(error, result) {
+            objError = error
+            resultSession = result
+        })
+        if(objError) {
+            console.error("DB error searching sessions: \n\t" + objError)
+            res.status(500).json({})
+            return
+        } else if(resultSession.UserID != resultCourse.OwnerID) {
+            res.status(401).json({})
+            return
+        }
+
+        // Add the student to the course
+        strCommand = `INSERT INTO tblStudents (CourseID, StudentID) VALUES (?, ?)`
+        await db.run(strCommand, [req.params.courseId, req.params.studentId], function(error) {
+            if(error) {
+                console.error("DB error adding student to course: \n\t" + error)
+                res.status(500).json({})
+                return
+            } else {
+                res.status(201).json({})
+            }
+        })
     } else {
         res.status(400).json({})
     }
