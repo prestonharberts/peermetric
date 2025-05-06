@@ -111,12 +111,15 @@ document.querySelector('#btnRegister').addEventListener('click', async () => {
   const regEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
   const regPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/
 
+
+
   let strEmail = document.querySelector("#txtEmailRegister").value.toLowerCase().trim()
   let strPassword = document.querySelector("#txtPasswordRegister").value
   let strPasswordConfirm = document.querySelector("#txtPasswordConfirm").value
   let strFirstName = document.querySelector("#txtFirstName").value
-  let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
+  // let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
   let strLastName = document.querySelector("#txtLastName").value
+
   let strBio = document.querySelector('#txtBio').value
 
   let blnError = false
@@ -130,7 +133,7 @@ document.querySelector('#btnRegister').addEventListener('click', async () => {
   if (!regPassword.test(strPassword)) {
     blnError = true
     strErrorMessage += "<p>Invalid Password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>"
-  }
+
 
   if (strPassword != strPasswordConfirm)
   {
@@ -182,6 +185,7 @@ document.querySelector('#btnRegister').addEventListener('click', async () => {
   else {
     localStorage.setItem('userName', strFirstName)
 
+
     try
     {
       const objResponse = await fetch('http://localhost:1025/user', {
@@ -218,6 +222,7 @@ document.querySelector('#btnRegister').addEventListener('click', async () => {
       {
         console.error(err.message)
       }
+
     }
 })
 
