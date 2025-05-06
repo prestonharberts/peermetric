@@ -71,9 +71,9 @@ CREATE TABLE `tblSessions` (
 
 
 INSERT INTO tblUsers (UserID, Email, FirstName, LastName, MiddleInitial, Password, Bio) VALUES ("7150dbe9-b4cf-472e-a24e-a1743ee1fbc1", "lol@aol.com", "N", "A", "/", "$2b$10$zi/.QOV7zEVKxsnzn93.quIfPBEqBAptH/ewWnWg8bNrpMwrrD0Nu", "lol"); /* Password is 12345678 */
-INSERT INTO tblCourses (CourseID, CourseCode, CourseName, OwnerID) VALUES ("a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6", "CS101", "Introduction to Computer Science", "7150dbe9-b4cf-472e-a24e-a1743ee1fbc1");
-INSERT INTO tblGroups (GroupID, CourseID) VALUES ("g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6", "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6");
-INSERT INTO tblStudents (UserID, CourseID, GroupID) VALUES ("7150dbe9-b4cf-472e-a24e-a1743ee1fbc1", "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6", "g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6");
-INSERT INTO tblReviewSpecifications (ReviewSpecID, CourseID, LiveDate, ExpiryDate) VALUES ("r1s2t3u4-v5w6-x7y8-z9a0-b1c2d3e4f5g6", "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6", 0, 9999999999);
+INSERT INTO tblCourses (CourseID, CourseCode, CourseName, OwnerID) VALUES ("b52e0500-58b5-4df3-9f43-d65795abf620", "CS101", "Introduction to Computer Science", "7150dbe9-b4cf-472e-a24e-a1743ee1fbc1");
+INSERT INTO tblGroups (GroupID, CourseID) VALUES ("g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6", "b52e0500-58b5-4df3-9f43-d65795abf620");
+INSERT INTO tblStudents (UserID, CourseID, GroupID) VALUES ("7150dbe9-b4cf-472e-a24e-a1743ee1fbc1", "b52e0500-58b5-4df3-9f43-d65795abf620", "g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6");
+INSERT INTO tblReviewSpecifications (ReviewSpecID, CourseID, LiveDate, ExpiryDate) VALUES ("r1s2t3u4-v5w6-x7y8-z9a0-b1c2d3e4f5g6", "b52e0500-58b5-4df3-9f43-d65795abf620", 0, 9999999999);
 INSERT INTO tblResponses (ResponseID, ReviewerID, TargetID, GroupID, ReviewSpecID, PublicFeedback, PrivateFeedback) VALUES ("98f345a8-2ba3-43d6-8281-67bc61cad2f4", "7150dbe9-b4cf-472e-a24e-a1743ee1fbc1", "7150dbe9-b4cf-472e-a24e-a1743ee1fbc1", "g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6", "r1s2t3u4-v5w6-x7y8-z9a0-b1c2d3e4f5g6", "Public feedback", "Private feedback");
 INSERT INTO tblSessions (SessionID, UserID, ExpiryDate) VALUES ("session123", "7150dbe9-b4cf-472e-a24e-a1743ee1fbc1", 9999999999);
