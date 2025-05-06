@@ -204,7 +204,7 @@ function renderGroupTable() {
 
 // handle form submission to create a new course and assign students
 // uses userMap to validate emails and adds students to default "No group"
-document.getElementById("formCreateCourse").addEventListener("submit", async function (event) {
+document.getElementById("formCreateCourse").addEventListener("submit", async function(event) {
   event.preventDefault()
 
   const inputCourseCode = document.getElementById("CourseID").value.trim()
@@ -227,7 +227,7 @@ document.getElementById("formCreateCourse").addEventListener("submit", async fun
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         courseCode: inputCourseCode,
-        friendlyName: inputCourseName
+        courseName: inputCourseName
       })
     })
 
@@ -323,7 +323,7 @@ document.getElementById("formCreateCourse").addEventListener("submit", async fun
 
 // live search for group table rows by keyword input
 // this function filters the rows in the group table based on the user's search query.
-document.getElementById('txtSearchGroups').addEventListener('input', function () {
+document.getElementById('txtSearchGroups').addEventListener('input', function() {
   const searchQuery = this.value.toLowerCase() // convert the search query to lowercase for case-insensitive matching.
   const rows = document.querySelectorAll('#taskList tr') // get all rows in the group table.
 

@@ -1,16 +1,5 @@
 -- Dates are represented as Unix Time, the number of seconds since 1970-01-01 00:00:00 UTC
 
-<<<<<<< HEAD
-CREATE TABLE `tblCourses` (
-  `CourseID` text NOT NULL,
-  `CourseCode` text NOT NULL,
-  `CourseName` text NOT NULL,
-  `InstructorID` text NOT NULL,
-  PRIMARY KEY (`CourseID`)
-);
-
-=======
->>>>>>> endpoints-to-db
 CREATE TABLE `tblUsers` (
   `UserID` text NOT NULL,
   `Email` text NOT NULL,
@@ -45,7 +34,7 @@ CREATE TABLE `tblStudents` (
   FOREIGN KEY (`UserID`) REFERENCES `tblUsers`(`UserID`),
   FOREIGN KEY (`CourseID`) REFERENCES `tblCourses`(`CourseID`),
   FOREIGN KEY (`GroupID`) REFERENCES `tblGroups` (`GroupID`),
-  Primary Key (`UserID`, `CourseCode`)
+  Primary Key (`UserID`, `CourseID`)
 );
 
 CREATE TABLE `tblReviewSpecifications` (
