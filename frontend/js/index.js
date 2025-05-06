@@ -117,7 +117,7 @@ document.querySelector('#btnRegister').addEventListener('click', async () => {
   let strPassword = document.querySelector("#txtPasswordRegister").value
   let strPasswordConfirm = document.querySelector("#txtPasswordConfirm").value
   let strFirstName = document.querySelector("#txtFirstName").value
-  // let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
+  let strMiddleInitial = document.querySelector("#txtMiddleInitial").value
   let strLastName = document.querySelector("#txtLastName").value
 
   let strBio = document.querySelector('#txtBio').value
@@ -129,14 +129,13 @@ document.querySelector('#btnRegister').addEventListener('click', async () => {
     blnError = true
     strErrorMessage += "<p>Invalid Email!</p>"
   }
-   
+
   if (!regPassword.test(strPassword)) {
     blnError = true
     strErrorMessage += "<p>Invalid Password (at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters)</p>"
+  }
 
-
-  if (strPassword != strPasswordConfirm)
-  {
+  if (strPassword != strPasswordConfirm) {
     blnError = true
     strErrorMessage += "<p>Passwords do not match!</p>"
   }
@@ -186,8 +185,7 @@ document.querySelector('#btnRegister').addEventListener('click', async () => {
     localStorage.setItem('userName', strFirstName)
 
 
-    try
-    {
+    try {
       const objResponse = await fetch('http://localhost:1025/user', {
         method: "POST",
         headers: {
@@ -203,32 +201,28 @@ document.querySelector('#btnRegister').addEventListener('click', async () => {
           bio: strBio
         })
       })
-      
-      if (await objResponse.ok)
-        {
-          Login(strEmail, strPassword)
-        }
-        else
-        {
-          Swal.fire
+
+      if (await objResponse.ok) {
+        Login(strEmail, strPassword)
+      }
+      else {
+        Swal.fire
           ({
             title: "Error!",
             text: "Could not register new user!",
             icon: 'error'
           })
-        }
       }
-      catch (err)
-      {
-        console.error(err.message)
-      }
-
     }
+    catch (err) {
+      console.error(err.message)
+    }
+
+  }
 })
 
 // Login if successful
-async function Login(strEmail, strPassword)
-{
+async function Login(strEmail, strPassword) {
   // Make a new session
   objResponse = await fetch('http://localhost:1025/session', {
     method: "POST",
@@ -241,8 +235,7 @@ async function Login(strEmail, strPassword)
     })
   })
   // Change page to dashboard based on currently selected role
-  if (await objResponse.ok)
-  {
+  if (await objResponse.ok) {
     const strRegisterType = document.querySelector("#txtRegisterType").value
     // Redirect logic
     if (strRegisterType == 'Student account') {
@@ -251,8 +244,7 @@ async function Login(strEmail, strPassword)
       window.location.href = 'faculty.html'
     }
   }
-  else
-  {
+  else {
     Swal.fire({
       title: "Error!",
       text: "Could not log in!",
@@ -262,14 +254,14 @@ async function Login(strEmail, strPassword)
 }
 
 // jQuery
-$('#btnSwapLogin').on('click', function () {
-  $('#frmLogin').slideUp(function () {
+$('#btnSwapLogin').on('click', function() {
+  $('#frmLogin').slideUp(function() {
     $('#frmRegister').slideDown()
   })
 })
 
-$('#btnSwapRegister').on('click', function () {
-  $('#frmRegister').slideUp(function () {
+$('#btnSwapRegister').on('click', function() {
+  $('#frmRegister').slideUp(function() {
     $('#frmLogin').slideDown()
   })
 })

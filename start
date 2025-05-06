@@ -6,107 +6,125 @@ rm -f ./peermetric-0.1.db
 # Create a new SQLite database and populate schema + sample data
 sqlite3 ./peermetric-0.1.db <<'EOF'
 
--- Schema: Full normalized structure
-CREATE TABLE tblCourses (
-  CourseID TEXT NOT NULL,
-  CourseCode TEXT NOT NULL,
-  CourseName TEXT NOT NULL,
-  OwnerID TEXT NOT NULL,
-  PRIMARY KEY (CourseID)
-);
-
 CREATE TABLE tblUsers (
-  UserID TEXT NOT NULL,
-  Email TEXT NOT NULL,
-  FirstName TEXT NOT NULL,
-  LastName TEXT NOT NULL,
-  Password TEXT NOT NULL,
-  Bio TEXT,
+  UserID text NOT NULL,
+  Email text NOT NULL,
+  FirstName text NOT NULL,
+  LastName text NOT NULL,
+  MiddleInitial text,
+  Password text NOT NULL,
+  Bio text,
   PRIMARY KEY (UserID)
 );
 
-CREATE TABLE tblGroups (
-  GroupID TEXT NOT NULL,
-  CourseID TEXT NOT NULL,
-  PRIMARY KEY (GroupID),
-  FOREIGN KEY (CourseID) REFERENCES tblCourses(CourseID)
+CREATE TABLE tblCourses (
+  CourseID text NOT NULL,
+  CourseCode text NOT NULL,
+  CourseName text NOT NULL,
+  OwnerID text NOT NULL,
+  PRIMARY KEY (CourseID)
+  FOREIGN KEY (OwnerID) REFERENCES tblUsers (UserID)
 );
 
-CREATE TABLE tblReviewSpecifications (
-  ReviewSpecID TEXT NOT NULL,
-  CourseID TEXT NOT NULL,
-  LiveDate INT NOT NULL,
-  ExpiryDate INT NOT NULL,
-  PRIMARY KEY (ReviewSpecID),
-  FOREIGN KEY (CourseID) REFERENCES tblCourses(CourseID)
+CREATE TABLE tblGroups (
+  GroupID text NOT NULL,
+  CourseID text NOT NULL,
+  PRIMARY KEY (GroupID),
+  FOREIGN KEY (CourseID) REFERENCES tblCourses (CourseID)
 );
 
 CREATE TABLE tblStudents (
-  UserID TEXT NOT NULL,
-  CourseID TEXT NOT NULL,
-  GroupID TEXT,
-  PRIMARY KEY (UserID, CourseID),
+  UserID text NOT NULL,
+  CourseID text NOT NULL,
+  GroupID text,
   FOREIGN KEY (UserID) REFERENCES tblUsers(UserID),
   FOREIGN KEY (CourseID) REFERENCES tblCourses(CourseID),
-  FOREIGN KEY (GroupID) REFERENCES tblGroups(GroupID)
+  FOREIGN KEY (GroupID) REFERENCES tblGroups (GroupID),
+  Primary Key (UserID, CourseID)
+);
+
+CREATE TABLE tblReviewSpecifications (
+  ReviewSpecID text NOT NULL,
+  CourseID text NOT NULL,
+  LiveDate int NOT NULL,
+  ExpiryDate int NOT NULL,
+  PRIMARY KEY (ReviewSpecID),
+  FOREIGN KEY (CourseID) REFERENCES tblCourses (CourseID)
 );
 
 CREATE TABLE tblResponses (
-  ResponseID TEXT NOT NULL,
-  ReviewerID TEXT NOT NULL,
-  TargetID TEXT NOT NULL,
-  GroupID TEXT NOT NULL,
-  ReviewSpecID TEXT NOT NULL,
-  PublicFeedback TEXT,
-  PrivateFeedback TEXT,
+  ResponseID text NOT NULL,
+  ReviewerID text NOT NULL,
+  TargetID text NOT NULL,
+  GroupID text NOT NULL,
+  ReviewSpecID text NOT NULL,
+  PublicFeedback text,
+  PrivateFeedback text,
   PRIMARY KEY (ResponseID),
-  FOREIGN KEY (ReviewerID) REFERENCES tblUsers(UserID),
-  FOREIGN KEY (TargetID) REFERENCES tblUsers(UserID),
-  FOREIGN KEY (GroupID) REFERENCES tblGroups(GroupID),
-  FOREIGN KEY (ReviewSpecID) REFERENCES tblReviewSpecifications(ReviewSpecID)
+  FOREIGN KEY (ReviewerID) REFERENCES tblUsers (UserID),
+  FOREIGN KEY (TargetID) REFERENCES tblUsers (UserID),
+  FOREIGN KEY (GroupID) REFERENCES tblGroups (GroupID),
+  FOREIGN KEY (ReviewSpecID) REFERENCES tblReviewSpecifications (ReviewSpecID)
 );
 
 CREATE TABLE tblSessions (
-  SessionID TEXT NOT NULL,
-  UserID TEXT NOT NULL,
-  ExpiryDate INT NOT NULL,
+  SessionID text NOT NULL,
+  UserID text NOT NULL,
+  ExpiryDate int NOT NULL,
   PRIMARY KEY (SessionID),
-  FOREIGN KEY (UserID) REFERENCES tblUsers(UserID)
+  FOREIGN KEY (UserID) REFERENCES tblUsers (UserID)
 );
 
--- Insert sample users
-INSERT INTO tblUsers (UserID, Email, FirstName, LastName, Password, Bio) VALUES
-('2d880362-2e3d-472e-ad28-3387fcd67334', 'johndoe@tntech.edu', 'John', 'Doe', '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta', 'johnddoe#1254'),
-('019553a1-7462-485f-a996-e791099a4bef', 'janesmith@tntech.edu', 'Jane', 'Smith', '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta', 'janesmith#0943'),
-('5b91a79f-924b-4208-8350-d21e756cf04a', 'alicebrown@tntech.edu', 'Alice', 'Brown', '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta', 'alicebrown#6789'),
-('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'bobjohnson@tntech.edu', 'Bobby', 'Johnson', '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta', 'bigbobby_j#8324');
+-- Users
+INSERT INTO tblUsers (UserID, Email, FirstName, LastName, MiddleInitial, Password, Bio) VALUES
+('7150dbe9-b4cf-472e-a24e-a1743ee1fbc1', 'bburchfield@tntech.edu', 'Ben', 'Burchfield', '/', '$2b$10$rtInqa6mgf8oGDn9hMTFsehy/IF0hChbnDhj1uXbd9909CFAAVk4W', 'lol'),
+('11111111-1111-1111-1111-111111111111', 'alice@tntech.edu', 'Alice', 'Anderson', 'M', 'pw1', 'Enjoys coding.'),
+('22222222-2222-2222-2222-222222222222', 'bob@tntech.edu', 'Bob', 'Brown', 'T', 'pw2', 'Math enthusiast.'),
+('33333333-3333-3333-3333-333333333333', 'carla@tntech.edu', 'Carla', 'Clark', 'L', 'pw3', 'Loves philosophy.'),
+('44444444-4444-4444-4444-444444444444', 'dave@tntech.edu', 'Dave', 'Davis', 'E', 'pw4', 'Aspiring software engineer.');
 
--- Insert courses
-INSERT INTO tblCourses (CourseID, CourseCode, CourseName, InstructorID) VALUES
-('course1', 'CSC 1310-001', 'Data Structures and Algorithms', '2dae03a7-e7bc-49be-9782-5bf5e667ad06'),
-('course2', 'CSC 3100-001', 'Web Development', '5b91a79f-924b-4208-8350-d21e756cf04a');
+-- Courses
+INSERT INTO tblCourses (CourseID, CourseCode, CourseName, OwnerID) VALUES
+('b52e0500-58b5-4df3-9f43-d65795abf620', 'CS101', 'Introduction to Computer Science', '7150dbe9-b4cf-472e-a24e-a1743ee1fbc1'),
+('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'CSC1300-001', 'Intro to Problem-Solving/Computing', '7150dbe9-b4cf-472e-a24e-a1743ee1fbc1'),
+('aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'CSC1310-001', 'Data Structures and Algorithms', '7150dbe9-b4cf-472e-a24e-a1743ee1fbc1'),
+('aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 'PHIL1010', 'Intro to Philosophy', '7150dbe9-b4cf-472e-a24e-a1743ee1fbc1'),
+('aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 'MATH1910', 'Pre-Calculus Algebra', '7150dbe9-b4cf-472e-a24e-a1743ee1fbc1');
 
--- Insert groups
+-- Groups
 INSERT INTO tblGroups (GroupID, CourseID) VALUES
-('A1', 'course1'),
-('A2', 'course2');
+('group-cs101', 'b52e0500-58b5-4df3-9f43-d65795abf620'),
+('group-csc1300', 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1'),
+('group-csc1310', 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2'),
+('group-phil1010', 'aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3'),
+('group-math1910', 'aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4');
 
--- Insert review specs
-INSERT INTO tblReviewSpecifications (ReviewSpecID, CourseID, LiveDate, ExpiryDate) VALUES
-('R1', 'course1', 1714348800, 1715039999),
-('R2', 'course2', 1714435200, 1715126399);
-
--- Insert students
+-- Students
 INSERT INTO tblStudents (UserID, CourseID, GroupID) VALUES
-('2d880362-2e3d-472e-ad28-3387fcd67334', 'course1', 'A1'),
-('019553a1-7462-485f-a996-e791099a4bef', 'course1', 'A1'),
-('5b91a79f-924b-4208-8350-d21e756cf04a', 'course2', 'A2'),
-('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'course2', 'A2');
+('11111111-1111-1111-1111-111111111111', 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'group-csc1300'),
+('22222222-2222-2222-2222-222222222222', 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'group-csc1300'),
+('33333333-3333-3333-3333-333333333333', 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'group-csc1310'),
+('44444444-4444-4444-4444-444444444444', 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'group-csc1310'),
+('11111111-1111-1111-1111-111111111111', 'aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 'group-phil1010'),
+('22222222-2222-2222-2222-222222222222', 'aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 'group-math1910');
 
--- Insert responses
+-- Review Specifications
+INSERT INTO tblReviewSpecifications (ReviewSpecID, CourseID, LiveDate, ExpiryDate) VALUES
+('rev-cs1300', 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 0, 9999999999),
+('rev-cs1310', 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 0, 9999999999);
+
+-- Responses (some made-up ones)
 INSERT INTO tblResponses (ResponseID, ReviewerID, TargetID, GroupID, ReviewSpecID, PublicFeedback, PrivateFeedback) VALUES
-('RESP1', '2d880362-2e3d-472e-ad28-3387fcd67334', '019553a1-7462-485f-a996-e791099a4bef', 'A1', 'R1', 'Jane did a great job collaborating.', 'Sometimes late to meetings.'),
-('RESP2', '5b91a79f-924b-4208-8350-d21e756cf04a', '2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'A2', 'R2', 'Bob was very helpful during coding.', 'Could communicate more.');
+('resp1', '11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 'group-csc1300', 'rev-cs1300', 'Great teamwork', 'Could communicate more clearly'),
+('resp2', '22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'group-csc1300', 'rev-cs1300', 'Very helpful', 'Sometimes late to meetings'),
+('resp3', '33333333-3333-3333-3333-333333333333', '44444444-4444-4444-4444-444444444444', 'group-csc1310', 'rev-cs1310', 'Knows the content well', 'Needs to slow down explanations');
+
+-- Sessions
+INSERT INTO tblSessions (SessionID, UserID, ExpiryDate) VALUES
+('session123', '7150dbe9-b4cf-472e-a24e-a1743ee1fbc1', 9999999999),
+('session-alice', '11111111-1111-1111-1111-111111111111', 9999999999),
+('session-bob', '22222222-2222-2222-2222-222222222222', 9999999999);
+
 
 EOF
 

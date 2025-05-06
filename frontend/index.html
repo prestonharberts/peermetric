@@ -79,11 +79,40 @@
       </div>
     </form>
   </div>
+
+  <footer class="bg-transparent text-dark fixed-bottom">
+    <div class="container-fluid d-flex justify-content-start align-items-center position-relative" style="height: 50px;">
+
+      <!-- Left-aligned Click Me Button -->
+      <button id="clickMeButton" class="btn btn-link text-decoration-none text-dark me-auto">
+        <b>Click Me!</b>
+      </button>
+
+      <!-- Centered absolutely in the viewport -->
+      <small class="position-absolute start-50 translate-middle-x text-center">
+        © 2025
+        <a class="text-decoration-none" href="https://github.com/prestonharberts/peermetric">Peermetric (GitHub)</a>
+        <span>CC BY 4.0</span>
+      </small>
+
+    </div>
+  </footer>
   <!-- JS SCRIPTS -->
   <script src="js/lib/jquery-3.7.1.min.js"></script>
   <script src="js/lib/bootstrap.bundle.min.js"></script>
   <script src="js/lib/sweetalert2.all.min.js"></script>
   <script src="js/index.js"></script>
+  <script>
+    document.getElementById('clickMeButton').addEventListener('click', function () {
+      Swal.fire({
+        title: 'CSC 3100 - Final Project',
+        text: 'Make sure you are running on Live Server and accessing localhost:5500/frontend/faculty.html. Login as bburchfield@tntech.edu with password Mickey2025! for an example account.',
+        icon: 'info',
+        confirmButtonText: 'OK'
+      });
+    });
+
+  </script>
 </body>
 
 </html>
