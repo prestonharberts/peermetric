@@ -2023,6 +2023,7 @@ app.get('/response/:responseId', validateSession, async (req, res, next) => {
     objError = error
     resultResponse = result
   })
+  await new Promise(r => setTimeout(r, intTimeout))
   if(objError) {
     console.error("DB error searching responses: \n\t" + objError)
     res.status(500).json({})
