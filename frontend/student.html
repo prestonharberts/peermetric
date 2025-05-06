@@ -7,13 +7,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:,">
   <!-- PAGE TITLE -->
-  <title>Student App</title>
+  <title>Student – Peermetric</title>
   <!-- SITE ICON -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/x-icon" href="img/peermetric.png">
   <!-- CSS STYLESHEETS -->
   <link rel="stylesheet" href="css/lib/bootstrap.min.css" />
   <link rel="stylesheet" href="css/lib/sweetalert2.min.css" />
   <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      background:
+        linear-gradient(to bottom,
+          #ffffff,
+          #ffffff,
+          rgba(13, 110, 252, 0.18)),
+        #ffffff;
+      background-attachment: fixed;
+    }
+  </style>
 </head>
 
 <body class="bg-light">
@@ -24,194 +35,154 @@
     </div> -->
 
     <!-- PAGE HEADER -->
-    <!-- PAGE HEADER -->
     <div class="row align-items-center mb-3 text-center">
       <div class="col text-start">
-        <h5 id="userNameHeader" class="mb-0">Hello, </h5>
+        <h5 id="userNameHeader" class="mb-0"></h5>
       </div>
       <div class="col-auto mx-auto">
         <h3 class="mb-0">
-          <span class="fw-bold">Student</span>
-          <span class="opacity-75 fw-light">|</span>
-          <span class="opacity-50 fw-light">RateMyTeam</span>
+          <img src="./img/peermetric.png" alt="peermetric logo of 3 abstract people in a bubble" class="me-2" style="height: 1.7rem; vertical-align: middle; position: relative; top: -0.1rem;">
+          <span class=" fw-light fw-bold">Peermetric</span>
+          <span class="opacity-75 fw-light mx-1">|</span>
+          <span class="fw-light opacity-50">Student</span>
         </h3>
       </div>
       <div class="col text-end">
-        <a href="index.html" style="text-decoration: none;">
-          <h5 class="mb-0 text-primary">
-            <u>Log out</u>
+        <a href="index.html" id="signOutLink" style="text-decoration: none;">
+          <h5 class="mb-0 text-secondary">
+            Sign out
           </h5>
         </a>
       </div>
     </div>
 
-    <!-- Join Group FORM -->
-    <div class="card shadow mb-3">
-      <div class="card-header bg-success text-white">
-        <strong>Join Group</strong>
-      </div>
-      <div class="card-body">
-        <!-- add task inputs (Bootstrap-styled, with aria-labels) -->
-        <form id="formEnterGroup" onsubmit="return true">
-          <!-- ROW -->
-          <!-- GAP -->
-          <div class="row g-2 mb-2">
-            <div class="col-md-10">
-              <!-- input for group key -->
-              <input id="txtGroupKey" type="text" class="form-control" placeholder="Group Key" required aria-label="input group key" />
-            </div>
-            <div class="col-md-2">
-              <!-- submit button -->
-              <button type="submit" id="btnEnterGroup" class="btn btn-success w-100">Join Group</button>
-            </div>
+    <!-- ACCORDION CONTAINER -->
+    <div class="accordion mb-3" id="formAccordion">
+
+
+      <!-- DO SURVERYS -->
+      <div class="card shadow mb-3">
+        <div class="card-header bg-secondary text-light">
+          <h2 class="mb-0">
+            <button class="btn text-light w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSurveys" aria-expanded="false" aria-controls="collapseCourse">
+              <b>Surveys</b>
+            </button>
+          </h2>
+        </div>
+        <div id="collapseSurveys" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+          <div id="putFormsHere" class="card">
+          <!--FORMS go here... Divs for Courses; Divs in those courses for Groups; Divs in those Groups for Surveys-->
+           
           </div>
-        </form>
+        </div>
       </div>
+
     </div>
 
-    <!-- NEW Survey FORM -->
+    <!-- COURSE LIST TABLE -->
     <div class="card shadow mb-3">
-      <div class="card-header bg-success text-white">
-        <strong>Incoming Survey</strong>
-      </div>
-      <div class="card-body">
-        <!-- add form inputs (Bootstrap-styled, with aria-labels) -->
-        <form id="formAddReview" onsubmit="return true">
-          <!-- ROW -->
-          <!-- GAP -->
-          <div class="row g-2 mb-4">
-            <div class="col-md-3">
-              <!-- input for student name -->
-              <input id="txtStudentName" type="text" class="form-control" placeholder="Student Name" required aria-label="input student name" />
-            </div>
-            <div class="col-md-3">
-              <!-- input for visibility -->
-              <!-- COMBO BOXES -->
-              <select id="txtReviewVisibility" class="form-control" aria-label="select review visibility">
-                <option value="" selected hidden>Choose Visibility</option>
-                <option value="Public">Public</option>
-                <option value="Private">Private</option>
-              </select>
-            </div>
-          </div>
-          <div class="row g-2 mb-2">
-            <div class="col-md-10">
-              <!-- example survey question 1 -->
-              <span>How much did your teammate contribute to the group?</span>
-              <input id="txtSurveyQuestion1" type="text" class="form-control mt-1" placeholder="Enter Short Answer" aria-label="input short answer" />
-            </div>
-          </div>
-          <div class="row g-2 mb-2">
-            <div class="col-md-10">
-              <!-- example survey question 2 -->
-              <span>Which of the following areas did your teammate do the best in? (Check all that apply)</span>
-              <div class="ms-2">
-                <input type="checkbox" id="checkbox1" name="checkbox1" value="Communicates effectively">
-                <label for="checkbox1">Communicates effectively</label><br>
-                <input type="checkbox" id="checkbox2" name="checkbox2" value="Meets deadlines consistently">
-                <label for="vehicle2">Meets deadlines consistently</label><br>
-                <input type="checkbox" id="checkbox3" name="checkbox3" value="Contributes valuable ideas">
-                <label for="vehicle3">Contributes valuable ideas</label><br>
-                <input type="checkbox" id="checkbox4" name="checkbox4" value="Supports other team members">
-                <label for="vehicle3">Supports other team members</label><br>
-                <input type="checkbox" id="checkbox5" name="checkbox5" value="Takes initiative">
-                <label for="vehicle3">Takes initiative</label><br>
-                <input type="checkbox" id="checkbox6" name="checkbox6" value="Demonstrates reliability">
-                <label for="vehicle3">Demonstrates reliability</label><br>
-              </div>
-            </div>
-          </div>
-          <div class="row g-2 mb-2">
-            <div class="col-md-10">
-              <!-- example survey question 3 -->
-              <span>How do you rate your teammate overall</span>
-              <select id="txtSurveyQuestion3" class="form-control mt-1" aria-label="select teammate rating">
-                <option value="" selected hidden>Choose Rating</option>
-                <option value="1">Poor</option>
-                <option value="2">Average</option>
-                <option value="3">Poor</option>
-                <option value="4">Great</option>
-                <option value="5">Excellent</option>
-              </select>
-            </div>
-          </div>
-          <div class="row g-2 mb-2">
-            <div class="col-md-2">
-              <!-- submit button -->
-              <button type="submit" id="btnAddReview" class="btn btn-success w-100">Submit Review</button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- TO-DO TASK TABLE -->
-    <div class="card shadow">
-      <div class="card-header bg-primary text-white">
-        <strong>Group</strong>
+      <div class="card-header bg-primary text-light">
+        <b>Course List</b>
       </div>
 
       <div class="card-body">
         <!-- search box -->
-        <input type="text" id="txtSearchStudent" class="form-control mb-3" placeholder="Search name, email, phone, or bio..." aria-label="search students" />
+        <!-- <input type="text" id="surveySearch" class="form-control mb-3" placeholder="Search course, group, member..." aria-label="search course list" /> -->
         <div class="table-responsive">
-          <table class="table table-bordered" id="taskTable">
+          <table class="table table-bordered">
             <thead class="thead-dark">
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Bio</th>
+                <th>Course</th>
+                <th>Students</th>
+                <th>Evaluations</th>
               </tr>
             </thead>
-            <tbody id="taskList">
-              <!-- populated by JS -->
+            <tbody id="courseList">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP LIST TABLE -->
+    <div class="card shadow">
+      <div class="card-header bg-primary text-light">
+        <b>Group List</b>
+      </div>
+
+      <div class="card-body">
+        <!-- search box -->
+        <input type="text" id="txtSearchGroups" class="form-control mb-3" placeholder="Search course, group, member..." aria-label="search tasks" />
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="thead-dark">
               <tr>
-                <th>Kyle Davis</th>
-                <th>kldavis48@tntech.edu</th>
-                <th>931-260-2327</th>
-                <th>Computer Science Major</th>
+                <th>Course</th>
+                <th>Group</th>
+                <th>Members</th>
+                <th>Evaluations</th>
               </tr>
-              <tr>
-                <th>Preston Harberts</th>
-                <th>pjharberts42@tntech.edu</th>
-                <th>931-260-1234</th>
-                <th>Also Computer Science Major</th>
-              </tr>
+            </thead>
+            <tbody id="groupList">
             </tbody>
         </div>
       </div>
     </div>
   </div>
 
+  <footer class="bg-transparent text-dark fixed-bottom">
+    <div class="container-fluid d-flex justify-content-start align-items-center position-relative" style="height: 50px;">
+
+      <!-- Left-aligned Click Me Button -->
+      <button id="clickMeButton" class="btn btn-link text-decoration-none text-dark me-auto">
+        <b>Click Me!</b>
+      </button>
+
+      <!-- Centered absolutely in the viewport -->
+      <small class="position-absolute start-50 translate-middle-x text-center">
+        © 2025
+        <a class="text-decoration-none" href="https://github.com/prestonharberts/peermetric">Peermetric (GitHub)</a>
+        <span>CC BY 4.0</span>
+      </small>
+
+    </div>
+  </footer>
+
   <!-- JS SCRIPTS -->
   <script src="js/lib/bootstrap.bundle.min.js"></script>
   <script src="js/lib/sweetalert2.all.min.js"></script>
-  <script src="js/sample-data.js"></script>
+  <script src="js/student.js"></script>
   <script>
-    document.getElementById('txtSearchStudent').addEventListener('input', function () {
-      const query = this.value.toLowerCase()
-      const rows = document.querySelectorAll('#taskList tr')
-
-      rows.forEach(row => {
-        const name = row.children[0].textContent.toLowerCase()
-        const email = row.children[1].textContent.toLowerCase()
-        const phone = row.children[2].textContent.toLocaleLowerCase()
-        const bio = row.children[3].textContent.toLowerCase()
-
-        const match = name.includes(query) || email.includes(query) || phone.includes(query) || bio.includes(query)
-        row.style.display = match ? '' : 'none'
-      })
-    })
-
     const userName = localStorage.getItem('userName')
+    const userNameHeader = document.getElementById('userNameHeader')
     if (userName) {
-      document.getElementById('userNameHeader').textContent += userName
+      userNameHeader.textContent += `Hello, ${userName}`
     } else {
-      document.getElementById('userNameHeader').textContent = 'No name found'
+      userNameHeader.textContent = 'No name found'
     }
-  </script>
 
+    document.getElementById('signOutLink').addEventListener('click', function (event) {
+      event.preventDefault(); // Stop default link behavior
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    });
+
+    // Add event listener for the left-aligned "Click Me" button
+
+    document.getElementById('clickMeButton').addEventListener('click', function () {
+      Swal.fire({
+        title: 'CSC 3100 - Final Project',
+        text: `Student Page (Trevor): This page was taken up about 8 hours before the assignment was due.
+              a groupmate seemed to drop out and file needed work. The goal was to dynamically show surveys
+              in the Surveys accordian menu when opened. Another design goal was to add functionality to 
+              leave a course or group. (Note: Most of the groundwork was layed by Preston)`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+      });
+    });
+
+  </script>
 </body>
 
 </html>
