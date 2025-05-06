@@ -10,7 +10,7 @@ sqlite3 ./peermetric-0.1.db <<'EOF'
 CREATE TABLE tblCourses (
   CourseID TEXT NOT NULL,
   CourseCode TEXT NOT NULL,
-  FriendlyName TEXT NOT NULL,
+  CourseName TEXT NOT NULL,
   OwnerID TEXT NOT NULL,
   PRIMARY KEY (CourseID)
 );
@@ -83,7 +83,7 @@ INSERT INTO tblUsers (UserID, Email, FirstName, LastName, MiddleInitial, Passwor
 ('2dae03a7-e7bc-49be-9782-5bf5e667ad06', 'bobjohnson@tntech.edu', 'Bobby', 'Johnson', 'P', '$2b$10$IFStE9VyQLvDFCYYRuvk7.vtJu7486/CDEtBMuok5qQXFwhV21Gta', 'bigbobby_j#8324');
 
 -- Insert courses
-INSERT INTO tblCourses (CourseID, CourseCode, FriendlyName, OwnerID) VALUES
+INSERT INTO tblCourses (CourseID, CourseCode, CourseName, OwnerID) VALUES
 ('course1', 'CSC 1310-001', 'Data Structures and Algorithms', '2dae03a7-e7bc-49be-9782-5bf5e667ad06'),
 ('course2', 'CSC 3100-001', 'Web Development', '5b91a79f-924b-4208-8350-d21e756cf04a');
 
