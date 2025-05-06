@@ -327,14 +327,23 @@ app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
                 message: err.message
             })
         }
-        return res.status(200).json({
+        if (!row)
+        {
+          return res.status(404).json({
+            message: "No user found!"
+          })
+        }
+        else
+        {
+          return res.status(200).json({
             userID: row.UserID,
             email: row.Email,
             firstName: row.FirstName,
             lastName: row.LastName,
             middleInitial: row.MiddleInitial,
             bio: row.Bio
-        })
+          })
+        }
     })
 })
 // app.get('/user/byUuid/:userId', validateSession, (req, res, next) => {
