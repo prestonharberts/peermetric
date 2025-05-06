@@ -1,264 +1,302 @@
-# API Documentation
+Note: This reference document was produced by ChatGPT from the file api.js, which includes plentiful documentation. Most of this should be correct; however, AI can make mistakes. When in doubt, please check api.js, where you can find accurate documentation in the comments above each endpoint.
+# API Endpoint Documentation
 
-This document describes the available endpoints for the Express-based API.
+This document outlines the available RESTful API endpoints, including their methods, paths, and general usage.
 
-## Authentication
+## Endpoints
 
-### POST `/session`
-**Description:** Create a new session  
-**Request Body:**  
-- `email`: string  
-- `password`: string  
+### `DELETE /course/:courseId`
 
-**Sample Request:**
-```js
-fetch('http://{IP}:1025/session', {
-      method: "POST",
-      headers: {"Content-Type":"Application/JSON"},
-      credentials: "include",
-      body: JSON.stringify({email:"lol", password:"lol"})
-      }).then(response => {return response.json()}).catch(error => {console.log(error)})
-```
+- **Method**: `DELETE`
+- **Path**: `/course/:courseId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-**Responses:**  
-- `201 Created`: Session created with `SESSION_ID` cookie  
-- `401 Unauthorized`: Invalid credentials  
+### `DELETE /course/:courseId/student/:studentId`
 
-### DELETE `/session`
-**Description:** Delete the session  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `205 Reset Content`: Session deleted  
-- `401 Unauthorized`: No valid session  
+- **Method**: `DELETE`
+- **Path**: `/course/:courseId/student/:studentId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
----
+### `DELETE /group/:groupId`
 
-## User
+- **Method**: `DELETE`
+- **Path**: `/group/:groupId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### POST `/user`
-**Description:** Create a new user  
-**Request Body:**  
-- `email`, `passwordHash`, `firstName`, `lastName`, `title`, `phoneNumber`, `otherContacts`  
+### `DELETE /group/:groupId/student/:studentId`
 
-**Responses:**  
-- `201 Created`  
-- `400 Bad Request`  
+- **Method**: `DELETE`
+- **Path**: `/group/:groupId/student/:studentId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### PUT `/user`
-**Description:** Update user information  
-**Cookie:** `SESSION_ID`  
-**Request Body:**  
-- `email`, `newPasswordHash`, `firstName`, `lastName`, `title`, `phoneNumber`, `otherContacts`  
+### `DELETE /response/:responseId`
 
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `DELETE`
+- **Path**: `/response/:responseId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### GET `/user`
-**Description:** Get current user info  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `200 OK`  
-- `401 Unauthorized`  
+### `DELETE /reviewSpec/:reviewSpecId`
 
-### GET `/user/byUuid/:userId`
-### GET `/user/byEmail/:email`
-**Description:** Get user info by ID or email  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `200 OK`  
-- `401 Unauthorized`  
+- **Method**: `DELETE`
+- **Path**: `/reviewSpec/:reviewSpecId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### DELETE `/user`
-**Description:** Delete the user  
-**Cookie:** `SESSION_ID`  
-**Request Body:**  
-- `password`: string  
+### `DELETE /session`
 
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `DELETE`
+- **Path**: `/session`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
----
+### `DELETE /user`
 
-## Course
+- **Method**: `DELETE`
+- **Path**: `/user`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### POST `/course`
-**Description:** Create a course  
-**Cookie:** `SESSION_ID`  
-**Request Body:**  
-- `courseCode`, `friendlyName`  
+### `DELETE /user/byEmail/:email`
 
-**Responses:**  
-- `201 Created` (with `courseId`)  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `DELETE`
+- **Path**: `/user/byEmail/:email`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### PUT `/course/:courseId`
-**Description:** Update course info  
-**Cookie:** `SESSION_ID`  
-**Request Body:**  
-- `courseCode`, `friendlyName`, `groupList`, `studentList`  
+### `GET /ad`
 
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `GET`
+- **Path**: `/ad`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### GET `/course/:courseId`
-**Description:** Get course info  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `200 OK`  
-- `401 Unauthorized`  
+### `GET /coffee`
 
-### DELETE `/course/:courseId`
-**Description:** Delete course  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `GET`
+- **Path**: `/coffee`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### POST `/course/:courseId/student/:studentId`
-### DELETE `/course/:courseId/student/:studentId`
-**Description:** Add/remove student from course  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+### `GET /course/:courseId`
 
----
+- **Method**: `GET`
+- **Path**: `/course/:courseId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-## Group
+### `GET /courses`
 
-### POST `/course/:courseId/group`
-**Description:** Add group to course  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created` (with `groupId`)  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `GET`
+- **Path**: `/courses`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### PUT `/group/:groupId`
-**Description:** Update group info  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+### `GET /group/:groupId`
 
-### GET `/group/:groupId`
-**Description:** Get group info  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `200 OK`  
-- `401 Unauthorized`  
+- **Method**: `GET`
+- **Path**: `/group/:groupId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### DELETE `/group/:groupId`
-**Description:** Delete group  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+### `GET /group/:groupId/responses`
 
-### POST `/group/:groupId/student/:studentId`
-### DELETE `/group/:groupId/student/:studentId`
-**Description:** Add/remove student to/from group  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `GET`
+- **Path**: `/group/:groupId/responses`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
----
+### `GET /groups`
 
-## Review Specification
+- **Method**: `GET`
+- **Path**: `/groups`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### POST `/course/:courseId/reviewSpec`
-**Description:** Create a review spec  
-**Cookie:** `SESSION_ID`  
-**Request Body:**  
-- `liveDate`, `expiryDate`  
+### `GET /response/:responseId`
 
-**Responses:**  
-- `201 Created` (with `reviewSpecId`)  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `GET`
+- **Path**: `/response/:responseId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### PUT `/reviewSpec/:reviewSpecId`
-**Description:** Update review spec  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+### `GET /response/:responseId/private`
 
-### GET `/reviewSpec/:reviewSpecId`
-**Description:** Get review spec  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `200 OK`  
-- `401 Unauthorized`  
+- **Method**: `GET`
+- **Path**: `/response/:responseId/private`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### DELETE `/reviewSpec/:reviewSpecId`
-**Description:** Delete review spec  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+### `GET /responses`
 
----
+- **Method**: `GET`
+- **Path**: `/responses`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-## Review Response
+### `GET /reviewSpec/:reviewSpecId`
 
-### POST `/group/:groupId/response`
-**Description:** Submit review response  
-**Cookie:** `SESSION_ID`  
-**Request Body:**  
-- `reviewSpecId`, `reviewerId`, `targetId`, `publicFeedback`, `privateFeedback`  
+- **Method**: `GET`
+- **Path**: `/reviewSpec/:reviewSpecId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-**Responses:**  
-- `201 Created` (with `responseId`)  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+### `GET /session`
 
-### GET `/response/:responseId`
-**Description:** Get public review response  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `200 OK`  
-- `401 Unauthorized`  
+- **Method**: `GET`
+- **Path**: `/session`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### GET `/response/:responseId/private`
-**Description:** Get full review response  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `200 OK`  
-- `401 Unauthorized`  
+### `GET /user`
 
-### DELETE `/response/:responseId`
-**Description:** Delete a review response  
-**Cookie:** `SESSION_ID`  
-**Responses:**  
-- `201 Created`  
-- `401 Unauthorized`  
-- `400 Bad Request`  
+- **Method**: `GET`
+- **Path**: `/user`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
----
+### `GET /user/byEmail/:email`
 
-## Misc
+- **Method**: `GET`
+- **Path**: `/user/byEmail/:email`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-### GET `/coffee`
-**Description:** I'm a teapot  
-**Response:**  
-- `418 I'm a teapot`
+### `GET /user/byUuid/:userId`
 
----
+- **Method**: `GET`
+- **Path**: `/user/byUuid/:userId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
 
-**Note:** Most endpoints require the `SESSION_ID` cookie for authentication.
+### `GET /users`
+
+- **Method**: `GET`
+- **Path**: `/users`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `POST /course`
+
+- **Method**: `POST`
+- **Path**: `/course`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `POST /course/:courseId/group`
+
+- **Method**: `POST`
+- **Path**: `/course/:courseId/group`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `POST /course/:courseId/reviewSpec`
+
+- **Method**: `POST`
+- **Path**: `/course/:courseId/reviewSpec`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `POST /course/:courseId/student/:studentId`
+
+- **Method**: `POST`
+- **Path**: `/course/:courseId/student/:studentId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `POST /group/:groupId/response/:reviewSpecId`
+
+- **Method**: `POST`
+- **Path**: `/group/:groupId/response/:reviewSpecId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `POST /group/:groupId/student/:studentId`
+
+- **Method**: `POST`
+- **Path**: `/group/:groupId/student/:studentId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `POST /session`
+
+- **Method**: `POST`
+- **Path**: `/session`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `POST /user`
+
+- **Method**: `POST`
+- **Path**: `/user`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `PUT /course/:courseId`
+
+- **Method**: `PUT`
+- **Path**: `/course/:courseId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `PUT /group/:groupId`
+
+- **Method**: `PUT`
+- **Path**: `/group/:groupId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `PUT /reviewSpec/:reviewSpecId`
+
+- **Method**: `PUT`
+- **Path**: `/reviewSpec/:reviewSpecId`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
+
+### `PUT /user`
+
+- **Method**: `PUT`
+- **Path**: `/user`
+- **Description**: _TODO: Add description._
+- **Request Parameters**: _TODO: Add parameters._
+- **Response**: _TODO: Describe response._
