@@ -1935,31 +1935,31 @@ app.get('/responses', validateSession, async (req, res) => {
   }
   if(req.query.groupId) {
     intCount++
-    strCommand += ` GroupID = ?`
+    strCommand = strCommand + ` GroupID = ?`
     arrQuerys.push(req.query.groupId)
   }
   if(req.query.reviewSpecId) {
     if(intCount > 0) {
-      strCommand += ` AND`
+      strCommand = strCommand + ` AND`
     }
     intCount++
-    strCommand += ` ReviewSpecID = ?`
+    strCommand = strCommand + ` ReviewSpecID = ?`
     arrQuerys.push(req.query.reviewSpecId)
   }
   if(req.query.reviewerId) {
     if(intCount > 0) {
-      strCommand += ` AND`
+      strCommand = strCommand + ` AND`
     }
     intCount++
-    strCommand += ` ReviewerID = ?`
+    strCommand = strCommand + ` ReviewerID = ?`
     arrQuerys.push(req.query.reviewerId)
   }
   if(req.query.targetId) {
     if(intCount > 0) {
-      strCommand += ` AND`
+      strCommand = strCommand + ` AND`
     }
     intCount++
-    strCommand += ` TargetID = ?`
+    strCommand = strCommand + ` TargetID = ?`
     arrQuerys.push(req.query.targetId)
   }
 
