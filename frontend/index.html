@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PAGE TITLE -->
+  <title>Peermetric</title>
+  <!-- SITE ICON -->
+  <link rel="icon" type="image/x-icon" href="img/peermetric.png">
+  <!-- CSS STYLESHEETS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/pulse/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/lib/sweetalert2.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      background:
+        linear-gradient(to bottom,
+          #ffffff,
+          rgba(13, 110, 252, 0.38)),
+        #ffffff;
+    }
+  </style>
+
+</head>
+
+<body>
+  <!-- LOGIN CARD -->
+  <div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center py-7" style="padding-top: 5rem; padding-bottom: 5rem;">
+    <form class="card shadow-lg col-12 col-md-5 col-lg-4" id="frmLogin">
+      <div class="card-body">
+        <h1 class="text-center mb-0 fw-light">Peermetric</h1>
+        <h3 class="text-center mt-3 opacity-50 mb-0 text-dark">Team Management Solution</h3>
+        <div class="d-flex justify-content-center">
+          <!-- IMAGE -->
+          <img src="./img/peermetric.png" alt="peermetric logo of 3 abstract people in a bubble" style="max-width: 25%;" class="mt-3 mb-3">
+        </div>
+        <!-- LOGIN DETAILS -->
+        <h4 class="text-center text-dark"><b>Account Login</b></h4>
+        <select id="txtLoginType" class="form-control mt-3" aria-label="select login type">
+          <option value="Student login" selected>Student login</option>
+          <option value="Faculty login">Faculty login</option>
+        </select>
+        <input id="txtEmailLogin" class="form-control mt-2" type="email" placeholder="Email" aria-label="email input" autocomplete="username">
+        <input id="txtPasswordLogin" class="form-control mt-2" type="password" placeholder="Password" aria-label="password input" autocomplete="current-password">
+        <button class="btn btn-primary col-12 mt-4" type="button" id="btnLogin">Log In</button>
+        <button class="btn btn-link col-12 mt-2" type="button" id="btnSwapLogin">Need an account? Create one</button>
+      </div>
+    </form>
+    <!-- REGISTER CARD -->
+    <form class="card shadow-lg col-12 col-md-5 col-lg-4" id="frmRegister" style="display: none;">
+      <div class="card-body">
+        <h1 class="text-center mb-0 fw-light">Peermetric</h1>
+        <h3 class="text-center mt-3 opacity-50 mb-0 text-dark">Team Management Solution</h3>
+        <div class="d-flex justify-content-center">
+          <!-- IMAGE -->
+          <img src="./img/peermetric.png" alt="peermetric logo of 3 abstract people in a bubble" style="max-width: 25%;" class="mt-3 mb-3">
+        </div>
+        <!-- REGISTER DETAILS -->
+        <h4 class="text-center mb-3 text-dark"><b>Create Account</b></h4>
+        <h5 class="text-dark">Account Information</h5>
+        <select id="txtRegisterType" class="form-control mt-2" aria-label="select register type">
+          <option value="Student account" selected>Student account</option>
+          <option value="Faculty account">Faculty account</option>
+        </select>
+        <input id="txtEmailRegister" class="form-control mt-2" type="email" placeholder="Email" aria-label="email input required" autocomplete="off">
+        <input id="txtPasswordRegister" class="form-control mt-2" type="password" placeholder="Password" aria-label="password input required" autocomplete="off">
+        <input id="txtPasswordConfirm" class="form-control mt-2" type="password" placeholder="Confirm Password" aria-label="confirm password input required" autocomplete="off">
+        <p class="mt-2 opacity-75">Requirements: at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and no special characters</p>
+        <h5 class="mt-4 text-dark">Personal Information</h5>
+        <input id="txtFirstName" class="form-control mt-2" placeholder="First Name" aria-label="first name input required">
+        <input id="txtMiddleInitial" class="form-control mt-2" placeholder="Middle Initial " aria-label="middle initial input ">
+        <input id="txtLastName" class="form-control mt-2" placeholder="Last Name" aria-label="last name input required">
+        <h5 class="mt-4 text-dark">Contact Information <span class="opacity-50"></span></h5>
+        <textarea id="txtBio" class="form-control mt-2" placeholder="Bio" aria-label="discord input"></textarea>
+
+        <button class="btn btn-primary col-12 mt-4" type="button" id="btnRegister">Register</button>
+        <button class="btn btn-link col-12 mt-2" type="button" id="btnSwapRegister">Already have an account? Sign in</button>
+      </div>
+    </form>
+  </div>
+
+  <footer class="bg-transparent text-dark fixed-bottom">
+    <div class="container-fluid d-flex justify-content-start align-items-center position-relative" style="height: 50px;">
+
+      <!-- Left-aligned Click Me Button -->
+      <button id="clickMeButton" class="btn btn-link text-decoration-none text-dark me-auto">
+        <b>Click Me!</b>
+      </button>
+
+      <!-- Centered absolutely in the viewport -->
+      <small class="position-absolute start-50 translate-middle-x text-center">
+        © 2025
+        <a class="text-decoration-none" href="https://github.com/prestonharberts/peermetric">Peermetric (GitHub)</a>
+        <span>CC BY 4.0</span>
+      </small>
+
+    </div>
+  </footer>
+  <!-- JS SCRIPTS -->
+  <script src="js/lib/jquery-3.7.1.min.js"></script>
+  <script src="js/lib/bootstrap.bundle.min.js"></script>
+  <script src="js/lib/sweetalert2.all.min.js"></script>
+  <script src="js/index.js"></script>
+  <script>
+    document.getElementById('clickMeButton').addEventListener('click', function () {
+      Swal.fire({
+        title: 'CSC 3100 - Final Project',
+        text: 'Make sure you are running on Live Server and accessing localhost:5500/frontend/faculty.html. Login as bburchfield@tntech.edu with password Mickey2025! for an example account.',
+        icon: 'info',
+        confirmButtonText: 'OK'
+      });
+    });
+
+  </script>
+</body>
+
+</html>
